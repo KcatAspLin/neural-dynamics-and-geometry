@@ -1,0 +1,179 @@
+\chapter{Applications to Artificial Neural Networks}\label{ch:10}
+
+\begin{insight}{Learning objectives}
+Write the complete state update of a vanilla RNN, GRU, and LSTM; analyze fixed-input equilibria using the correct discrete-time Jacobian; distinguish frozen-input analysis from driven trajectories; connect representation measurements to targeted interventions; and separate learning in parameter space from inference in activity space.
+\end{insight}
+
+\section{Two clocks, two state spaces}
+A recurrent network processes a sequence while its trained parameters remain fixed. Training changes those parameters across optimizer steps. These are different dynamical systems:
+\begin{equation}
+ h_{t+1}=F_{\theta}(h_t,u_t),\qquad
+ \theta_{k+1}=\theta_k-\eta\nabla_\theta L(\theta_k).
+ \label{eq:10-two-times}
+\end{equation}
+$t$ indexes sequence time, $k$ indexes training steps, $h_t$ is the recurrent state, and $\theta$ denotes all weights and biases. A network can have stable activity dynamics while training is unstable, or learn smoothly while generating oscillatory activity. A claim about a ``phase transition during learning'' must identify the changing parameter, the measured quantity, the finite-size or limiting setting, and whether ``phase transition'' is formal or descriptive.
+
+In a biological recording, the complete state and update rule are usually unknown. In an artificial network, the researcher can access every modeled state variable, hold inputs fixed, calculate derivatives, and apply counterfactual interventions. This allows stronger claims \emph{within that model}. It does not establish that a biological circuit uses the same mechanism merely because its trajectories look similar.
+
+\section{Vanilla recurrent networks and their Jacobians}
+For a tanh RNN,
+\begin{equation}
+ h_{t+1}=\tanh(Wh_t+Bu_t+b),\qquad
+ z_t=Vh_t+c,\qquad
+ p(y=j\mid h_t)=\frac{e^{z_{tj}}}{\sum_a e^{z_{ta}}}.
+ \label{eq:10-rnn}
+\end{equation}
+The nonlinearity is coordinatewise. $h_t\in\R^p$, $u_t\in\R^m$, $W\in\R^{p\times p}$, and $B\in\R^{p\times m}$. Logits $z_t$ are unrestricted real outputs; probabilities require the softmax. A change in Euclidean hidden-state distance need not produce a similar change in predictive probabilities, because both readout and normalization intervene.
+
+At fixed input $u_0$, an equilibrium solves $h^*=\tanh(Wh^*+Bu_0+b)$. The state Jacobian is
+\begin{equation}
+ J_* =D_hF(h^*,u_0)=\diag(1-(h^*)^2)W.\label{eq:10-jac}
+\end{equation}
+For perturbations $\delta h_t$, Taylor expansion gives $\delta h_{t+1}=J_*\delta h_t+O(\norm{\delta h_t}^2)$. For a continuously differentiable map, all eigenvalues strictly inside the unit disk imply local asymptotic stability; an eigenvalue outside the unit disk implies instability. Eigenvalues on the unit circle require nonlinear analysis. Comparing discrete eigenvalues to zero instead of unit magnitude is a category error.
+
+A leaky update $h_{t+1}=(1-a)h_t+a\phi(Wh_t+Bu_t+b)$ has Jacobian $(1-a)I+a\diag(\phi')W$. It resembles forward Euler for a continuous-time rate system when $a=\Delta t/\tau$ is small, but a large step can make the numerical map unstable even when the intended ODE is stable. An arbitrary token-processing RNN need not be an Euler discretization of any chosen biological timescale.
+
+\section{Gated dynamics: what the gates actually change}
+GRUs introduce data-dependent interpolation between an existing state and a candidate state \citep{app_cho2014}. Using the PyTorch convention and writing the update from $h_t$ to $h_{t+1}$,
+\begin{align}
+ r_t&=\sigma(W_ru_t+U_rh_t+b_r),\\
+ z_t&=\sigma(W_zu_t+U_zh_t+b_z),\\
+ n_t&=\tanh\!\left(W_nu_t+b_n^{\rm in}
+                  +r_t\odot(U_nh_t+b_n^{\rm rec})\right),\\
+ h_{t+1}&=z_t\odot h_t+(1-z_t)\odot n_t.
+ \label{eq:10-gru}
+\end{align}
+Here $\sigma(a)=1/(1+e^{-a})$ and $\odot$ is coordinatewise multiplication. This reset-after-multiplication candidate differs from the original reset-before-multiplication expression $U_n(r_t\odot h_t)$; the two are generally unequal. Always analyze the implementation that generated the data \citep{app_torchgru}.
+
+The update gate does not merely choose a fixed time constant, because it depends on state. Differentiating Equation~\eqref{eq:10-gru} at fixed input gives
+\begin{equation}
+ D_hF=\diag(z)+\diag(h-n)D_hz+\diag(1-z)D_hn,\label{eq:10-grujac}
+\end{equation}
+where
+\begin{align}
+ D_hz&=\diag(z\odot(1-z))U_z,\\
+ D_hn&=\diag(1-n^2)
+  \left[\diag(r)U_n+\diag(U_nh+b_n^{\rm rec})D_hr\right].
+\end{align}
+The reset derivative has the analogous sigmoid form. Ignoring gate derivatives changes the Jacobian and can change the stability verdict. A large update gate can support memory, but its numerical value alone is not a proof of a neutral mode or an attractor.
+
+Modern LSTM cells contain both a visible hidden state $h_t$ and an internal cell state $c_t$. A common no-peephole form is
+\begin{align}
+ i_t&=\sigma(W_iu_t+U_ih_t+b_i),\quad
+ f_t=\sigma(W_fu_t+U_fh_t+b_f),\\
+ o_t&=\sigma(W_ou_t+U_oh_t+b_o),\quad
+ g_t=\tanh(W_gu_t+U_gh_t+b_g),\\
+ c_{t+1}&=f_t\odot c_t+i_t\odot g_t,\qquad
+ h_{t+1}=o_t\odot\tanh(c_{t+1}).\label{eq:10-lstm}
+\end{align}
+The original LSTM paper introduced the memory architecture; the displayed forget-gate formulation is the modern implementation convention, not a claim that all current gates appeared identically in the original paper \citep{app_hochreiter1997,app_torchlstm}.
+
+The full recurrent state is $s_t=(h_t,c_t)\in\R^{2p}$. Holding $h_t$ fixed, $\partial c_{t+1}/\partial c_t=\diag(f_t)$, but that block is not the full state Jacobian. In particular,
+\[
+ \frac{\partial c_{t+1}}{\partial h_t}
+ =\diag(c_t)D_hf_t+\diag(g_t)D_hi_t+\diag(i_t)D_hg_t,
+\]
+and $h_{t+1}$ depends on both this derivative and the output gate. The Jacobian must include all four blocks mapping perturbations of $(h,c)$ to perturbations of $(h',c')$. Two states with the same $h_t$ but different $c_t$ can have different futures; a projected hidden-state trajectory can therefore appear non-Markovian even though the full model is deterministic.
+
+\section{Finding fixed points without confusing residuals with roots}
+\label{sec:10-fp}
+A convenient search objective is
+\begin{equation}
+ q(s)=\tfrac12\norm{F_\theta(s,u_0)-s}^2,
+ \qquad \nabla_s q=(D_sF-I)^\top(F-s).
+ \label{eq:10-residual}
+\end{equation}
+A zero residual is an exact fixed point; a small residual identifies a numerical candidate; a stationary optimizer point with nonzero residual need not be a fixed point. If $D_sF-I$ has a null direction, the gradient can vanish while $F-s$ remains nonzero. In continuous-time models, replace $F-s$ by the vector field $f(s,u_0)$. Fixed- and slow-point analysis was developed as a way to reverse-engineer recurrent computations \citep{app_sussillo2013}.
+
+A reproducible search should retain candidate states, residual norms, solver status, input settings, Jacobians, eigenvalues, and initialization provenance. Initialize from many task-visited states and additional nearby states, deduplicate solutions at a documented tolerance, and verify candidates by direct iteration. Failure to find a fixed point is not proof that none exists. Finding one far from the visited region does not establish its computational relevance. Unstable fixed points can nevertheless organize trajectories or separate decision basins.
+
+For a credible attractor account, test both local linearization and finite perturbations. Jacobian analysis is local; simulated perturbations probe the range over which the approximation works. Measure state recovery and output recovery separately. A network might return to the same decision while remaining in a different hidden state, or return in Euclidean state distance while a sensitive readout changes substantially.
+
+\section{Inputs determine which dynamics are being analyzed}
+A fixed-input search replaces a driven system by the autonomous map $F(\cdot,u_0)$. Choose $u_0$ for a scientific reason, such as silence during a delay, a constant sensory stimulus, or a fixed context. Zero input is a choice of experimental condition, not a generic definition of the network's dynamics. Context-dependent fixed-point arrangements can help explain how the same recurrent network implements different computations \citep{app_mante2013}.
+
+Along a nonstationary trajectory,
+\begin{equation}
+ \delta h_T\approx J_{T-1}J_{T-2}\cdots J_t\,\delta h_t,
+ \qquad J_t=D_hF(h_t,u_t).\label{eq:10-products}
+\end{equation}
+Eigenvalues of individual $J_t$ do not generally determine the growth of the product. For example,
+\[
+ A_1=\begin{pmatrix}.5&1\\0&.5\end{pmatrix},\qquad
+ A_2=\begin{pmatrix}.5&0\\1&.5\end{pmatrix}
+\]
+each has eigenvalues $0.5$, but $A_2A_1$ has an eigenvalue $(1.5+\sqrt2)/2>1$. Switching stable linear maps can therefore amplify perturbations. Singular values of the finite-time product directly measure maximum Euclidean amplification over the chosen window. This also explains why backpropagated gradients depend on products of Jacobians rather than on recurrent weight eigenvalues alone.
+
+For a repeated input sequence of period $P$, consider the return map
+\[
+ G(s)=F(\cdot,u_{P-1})\circ\cdots\circ F(s,u_0).
+\]
+A fixed point of $G$ is a state repeated after a complete input period, not necessarily after one step. Its derivative is the corresponding Jacobian product. In continuous time, the analogous periodic-orbit stability quantities are Floquet multipliers. For nonperiodic inputs, an augmented system that includes the input generator may be useful if such a generator is actually specified. Appending an arbitrary time index does not reveal the missing physiological mechanism.
+
+\section{Hidden-state geometry and a controlled memory example}
+A trained network for binary delayed memory receives a brief cue and must report it after a delay. Several mechanisms can solve a finite training set: two attracting states, two slow trajectories, an accurately timed transient sequence, or input-dependent activity maintained by a remaining cue. Projecting hidden states onto two PCs may separate the labels under all these mechanisms.
+
+Tutorial~8 trains a small tanh RNN on a synthetic version of this task. Its analysis records the full hidden state, uses a specified fixed delay input for root finding, and checks discrete Jacobian stability. The essential controls are longer unseen delays, cue perturbations, initial-state perturbations, and removal of possible input leakage. An attractor-based interpretation becomes stronger when states converge under fixed delay input and return after small perturbations; successful task performance alone leaves the mechanism open.
+
+When comparing training checkpoints, evaluate the same held-out probe bank at each checkpoint. Fit a common visualization basis or explicitly align separately fitted bases; otherwise a rotation of PCA axes can masquerade as a rotation of representations. Preserve raw states and analyses in their original coordinates. Track changes in fixed points, local spectra, transition maps, behavior, and loss, rather than equating a new-looking plot with a new mechanism.
+
+\section{Feedforward representations and comparison metrics}
+A feedforward layer maps $h^{(\ell)}$ to $h^{(\ell+1)}=\phi(W_\ell h^{(\ell)}+b_\ell)$. The layer index $\ell$ is depth, not physical time. Treating layers as iterations can be mathematically useful, particularly with shared weights or a specified continuous-depth limit, but arbitrary untied layers do not define an autonomous recurrent flow.
+
+If inputs lie on a manifold $M$, a smooth network maps them to an image $g(M)$. This image can collapse dimensions, identify distant inputs, or have rank-changing singularities. Smoothness of the map alone does not make the image an embedded manifold. Piecewise-linear ReLU networks introduce additional nonsmooth boundaries. Good decoding from a representation establishes the existence of a fitted predictor under a data split, not injectivity of the entire representation map.
+
+To compare two centered representations $H\in\R^{n\times p}$ and $G\in\R^{n\times q}$ on the same $n$ inputs, linear centered kernel alignment is
+\begin{equation}
+ \operatorname{CKA}(H,G)=
+ \frac{\norm{H^\top G}_F^2}
+ {\norm{H^\top H}_F\,\norm{G^\top G}_F},\label{eq:10-cka}
+\end{equation}
+provided the denominators are nonzero. It compares sample similarity structure and is invariant to orthogonal feature transformations and isotropic rescaling. It is not invariant to every invertible linear transformation. CCA and CKA therefore answer different equivalence questions; representation-comparison methods have different failure modes when feature dimension is large relative to sample count \citep{app_kornblith2019}. Neither high CKA nor a good Procrustes alignment proves that two systems implement the same causal computation.
+
+\section{From description to mechanism}
+A mechanistic proposal should explain how states and transitions produce the output, and should predict interventions. Suppose a proposed memory direction is a unit vector $v$. At a selected delay time compare $h\mapsto h+\delta v$ with perturbations of equal norm along orthogonal control directions. Measure future behavior and state trajectories, not only the immediate output. For a linear readout, an instantaneous perturbation effect is $V\delta h$; a later effect is approximately
+\begin{equation}
+ \delta z_T\approx VJ_{T-1}\cdots J_t\delta h_t.
+\end{equation}
+A direction initially in the readout null space can matter later through recurrent mixing. Conversely, ablating a feature may create out-of-distribution states and disrupt the network nonspecifically. Norm-matched controls, time-matched controls, and rescue interventions help distinguish a specific computational role from general damage.
+
+\begin{insight}{A model-level mechanism claim}
+\textbf{Object:} the full recurrent state map and its local invariant structure. \textbf{Hypothesis:} two stable delay states retain a binary cue. \textbf{Data:} hidden states, outputs, weights, and controlled counterfactual simulations. \textbf{Method:} root finding, Jacobians, basin probes, and delayed behavior tests. \textbf{Evidence:} verified stable states with predicted perturbation recovery and task consequences. \textbf{Alternatives:} slow transients or hidden cue dependence. \textbf{Limit:} the result explains the analyzed trained model; biological correspondence requires matched experimental evidence.
+\end{insight}
+
+\section{Learning as a dynamical system}
+For differentiable loss $L(\theta)$, ideal gradient flow in learning time $s$ is
+\begin{equation}
+ \frac{\mathrm d\theta}{\mathrm ds}=-\nabla L(\theta),
+ \qquad \frac{\mathrm dL}{\mathrm ds}=-\norm{\nabla L(\theta)}^2\leq0.
+ \label{eq:10-gradflow}
+\end{equation}
+The second equality is the chain rule. It does not guarantee a global minimum, and a continuum of equivalent parameters may create flat directions. Near a stationary point $\theta^*$ with Hessian $H_L$, perturbations obey $\dot{\delta\theta}=-H_L\delta\theta$. Positive-definite Hessian implies a strict locally stable minimum under this flow.
+
+For discrete gradient descent, the linearized update is $(I-\eta H_L)\delta\theta$. Along a positive Hessian eigenvalue $\mu$, stability requires $|1-\eta\mu|<1$, or $0<\eta\mu<2$. Thus a large learning rate can destabilize a minimum that is stable for gradient flow. Flat directions require higher-order analysis. Mini-batch gradients introduce sampling variability; momentum and Adam require optimizer moments as additional state variables. A checkpoint of weights alone is not the full state of those learning algorithms.
+
+\begin{example}[Parameters can move while the represented function changes differently]
+A two-factor scalar predictor is $\hat y=ab$, with loss $L=\tfrac12(ab-y)^2$. Gradient flow gives $\dot a=(y-ab)b$ and $\dot b=(y-ab)a$. Therefore
+\[
+ \frac{\mathrm d}{\mathrm ds}(a^2-b^2)=0,\qquad
+ \frac{\mathrm d}{\mathrm ds}(ab)=(y-ab)(a^2+b^2).
+\]
+Two initializations with the same product can have different learning speeds because $a^2+b^2$ differs. The function coordinate $ab$ and the parameter coordinates $(a,b)$ have related but distinct dynamics. A parameter-space distance need not be a representation-space distance.
+\end{example}
+
+\section{Generalization, memorization, and dimension}
+Low-dimensionality does not by itself imply generalization. A model can map each training example to its memorized binary label in a one-dimensional hidden representation and fail completely on new inputs. Conversely, a high-dimensional representation can support a simple, robust readout. The relevant questions concern invariance, margin, noise, sample distribution, computational rule, and validation under the intended shift.
+
+For sequence models, distinguish held-out sequences from unseen lengths, compositions, contexts, and input statistics. A system that interpolates among observed states may fail when a longer sequence reaches untested regions. A fixed-point explanation predicts some extrapolations, such as stable retention over longer delays, but only under unchanged dynamics and inputs. Verify those predictions directly. Representation geometry is one part of the evidence, with the strongest conclusions obtained when analysis and intervention agree.
+
+\section{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} Derive Equation~\eqref{eq:10-jac}. For a scalar RNN $h'=\tanh(wh)$, determine stability of $h^*=0$ as $w$ varies.
+\item \textbf{Intermediate.} Derive all terms in Equation~\eqref{eq:10-grujac}. Identify a term lost when the update gate is incorrectly treated as constant.
+\item \textbf{Intermediate.} Write the full $2p\times2p$ LSTM Jacobian in $(h,c)$ coordinates. Which block contains the forget gate directly, and why are its entries not the full eigenvalue spectrum?
+\item \textbf{Intermediate.} Verify the eigenvalues of $A_2A_1$ in the switching example. Compare spectral radius with largest singular value over one and several periods.
+\item \textbf{Advanced.} Design a fixed probe bank and perturbation analysis that distinguishes two fixed memories from two slow trajectories in a trained network. Specify tolerances, inputs, delays, baselines, and the condition under which failure would falsify your mechanism claim.
+\end{enumerate}
+
+\section{Summary and further reading}
+Artificial networks permit direct analysis of a fully specified model, provided the full recurrent state, input protocol, and update convention are respected. Fixed points and Jacobians describe local structure; finite-time products and interventions test its computational relevance. Learning evolves a different state in parameter space, often with additional optimizer variables. Read \citet{app_sussillo2013} for fixed-point reverse engineering, \citet{app_mante2013} for context-dependent computation, and \citet{app_kornblith2019} for representation-comparison invariances.

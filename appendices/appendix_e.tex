@@ -1,0 +1,133 @@
+\chapter{Alphabetical glossary}\label{app:e}
+This glossary gives short definitions and distinguishes mathematical objects from common operational uses. Its entries are reminders, not substitutes for the hypotheses and examples in the cited chapters. Symbols follow the notation table in the front matter.
+
+\section*{A}
+\begin{description}[style=nextline]
+\item[Ambient dimension.] The dimension $p$ of the space in which observations are represented, such as $\R^p$ for the activity of $p$ recorded neurons. It need not equal the number of latent degrees of freedom, the matrix rank, or the number of components retained by an analyst. Chapter~\ref{ch:01}.
+\item[Asymptotic stability.] An equilibrium or invariant set is Lyapunov stable and attracts trajectories from a neighborhood as time tends to infinity. Stability controls remaining close; attraction controls approaching. Their conjunction is stronger than either property alone. Chapters~\ref{ch:02}, \ref{ch:07}.
+\item[Attractor.] In this book, a compact invariant set that is Lyapunov stable and locally attracting, using distance to the set. Other definitions, including Milnor attraction, impose different conditions. A dense region in a scatter plot does not establish invariance, stability, or attraction. Chapters~\ref{ch:02}, \ref{ch:12}.
+\item[Atlas.] A collection of coordinate charts covering a manifold. A smooth atlas has smooth transition maps on chart overlaps. Different compatible atlases can describe the same smooth structure; one global coordinate system is not required. Chapter~\ref{ch:03}.
+\item[Autonomous system.] A system whose evolution rule has no explicit dependence on time, for example $\dot x=f(x)$. A driven system $\dot x=f(x,u(t))$ becomes autonomous in $x$ only after an appropriate restriction, such as fixing $u$, or by adding enough variables to represent the driver. Chapters~\ref{ch:02}, \ref{ch:10}.
+\end{description}
+
+\section*{B}
+\begin{description}[style=nextline]
+\item[Basin of attraction.] The set of initial states whose forward trajectories approach a specified attracting set. A basin is a property of an evolution rule and its inputs; clustering observed states does not directly estimate its boundaries. Chapters~\ref{ch:02}, \ref{ch:07}.
+\item[Betti number.] The dimension $\beta_q=\dim H_q(K;\F)$ of degree-$q$ homology over the stated field. Informally, $\beta_0$ counts connected components, $\beta_1$ independent loops, and $\beta_2$ independent two-dimensional cycles. Betti numbers do not classify arbitrary spaces up to homeomorphism. Chapter~\ref{ch:04}.
+\item[Bifurcation.] A qualitative change in the local or global dynamics as a parameter varies. In a saddle-node bifurcation, equilibria appear or disappear; a nondegenerate Hopf bifurcation produces a small periodic orbit as a complex eigenvalue pair crosses the imaginary axis under additional hypotheses. Chapter~\ref{ch:02}.
+\item[Boundary.] The image $\partial_{q+1}c$ of a chain under the boundary operator. Every boundary is a cycle because $\partial_q\partial_{q+1}=0$. A boundary in this algebraic sense is different from the boundary of a manifold or the edge of a plotted cloud. Chapter~\ref{ch:04}.
+\end{description}
+
+\section*{C}
+\begin{description}[style=nextline]
+\item[Center manifold.] A locally invariant manifold tangent at an equilibrium to its center generalized spectral subspace, corresponding to eigenvalues with zero real part. Under appropriate smoothness assumptions, it supports the reduced dynamics needed when linear stability tests are inconclusive. It is generally local and need not be unique. Chapter~\ref{ch:05}.
+\item[Chain.] A formal linear combination of oriented simplices over a coefficient field or ring. Over $\F_2$, coefficients are zero or one and orientation signs disappear. A chain is an algebraic object, not a time sequence of neural states. Chapter~\ref{ch:04}.
+\item[Chart.] A homeomorphism $\varphi:U\to V$, where $U$ is open in a manifold and $V$ is open in $\R^d$. It assigns local coordinates. A learned embedding of all data points is not automatically a chart, especially if it overlaps or tears neighborhoods. Chapter~\ref{ch:03}.
+\item[\v{C}ech complex.] Given balls of radius $r$ centered at sample points, a simplex is present when all its corresponding balls have a common intersection. Its relation to a union of balls motivates topological reconstruction under a good-cover condition. Here $r$ is a ball radius, not a Rips edge threshold. Chapter~\ref{ch:04}.
+\item[Cohomology.] A dual construction using cochains, which assign coefficients to chains, and the coboundary operator. Over a field, finite-dimensional homology and cohomology have matching dimensions. Integer first cohomology has a special relationship to maps into the circle; an arbitrary mod-two cocycle is not itself an angle. Chapters~\ref{ch:04}, \ref{ch:09}.
+\item[Compactness.] A topological space is compact if every open cover has a finite subcover. In a Euclidean space, compactness is equivalent to being closed and bounded. This equivalence is not a definition for every metric or topological space. Chapters~\ref{ch:04}, \ref{app:d}.
+\item[Connectedness.] A space is connected if it cannot be partitioned into two nonempty disjoint sets that are both open in the relative topology. Path-connectedness additionally requires a continuous path between each pair of points. These notions agree for connected manifolds but not for all spaces. Chapter~\ref{ch:04}.
+\item[Continuous attractor.] A family of states, often equilibria parameterized by a continuous variable, with transverse attraction and neutral motion along the family in an ideal model. Individual equilibria on the family need not be asymptotically stable. Noise, heterogeneity, and finite discretization can create diffusion, drift, or pinning. Chapter~\ref{ch:07}.
+\item[Covariance.] For random vector $Y$ with finite second moments, $\Cov(Y)=\E[(Y-\E Y)(Y-\E Y)^T]$. It summarizes pairwise second-order variation in chosen coordinates. Covariance eigenvalues depend on scaling and need not identify nonlinear intrinsic dimension. Chapters~\ref{ch:01}, \ref{app:c}.
+\item[Curvature.] A family of quantities describing how geometry deviates locally from flatness. Extrinsic bending depends on an embedding; intrinsic curvature is determined by the Riemannian metric. A cylinder bends in three-dimensional space while remaining intrinsically flat. Chapter~\ref{ch:03}.
+\item[Cycle.] A chain $c$ satisfying $\partial c=0$. Homology identifies cycles that differ by a boundary. An algebraic one-cycle is not the same object as a periodic orbit, despite the shared informal word ``cycle.'' Chapters~\ref{ch:02}, \ref{ch:04}.
+\end{description}
+
+\section*{D}
+\begin{description}[style=nextline]
+\item[Diffeomorphism.] A bijective smooth map with a smooth inverse. It preserves smooth structure. A homeomorphism need not be differentiable; a smooth bijection need not have a smooth inverse. Chapter~\ref{ch:03}.
+\item[Diffusion map.] A spectral coordinate construction derived from a normalized kernel Markov operator. Its coordinates represent diffusion distances at a chosen diffusion time under the specified kernel and normalization. Sampling density can affect the operator unless explicitly corrected. Chapter~\ref{ch:01}.
+\item[Dimension.] A term requiring an object and definition: vector-space dimension, manifold dimension, effective dimension, and fractal dimensions answer different questions. An estimated number of latent variables is also conditional on the estimator, scale, noise model, and validation target. Chapters~\ref{ch:01}, \ref{ch:12}.
+\item[Dynamical mode decomposition (DMD).] A regression or spectral method fitting a linear map between successive snapshots, commonly $Y\approx AX$. Its modes depend on observations and the sampled data. Relating them to Koopman eigenfunctions requires additional conditions; a useful linear approximation need not reveal the true nonlinear state. Chapter~\ref{ch:05}.
+\item[Dynamical system.] A rule for state evolution over time, such as iterating a map or solving an ODE. A collection of recorded states without temporal ordering specifies data, not an evolution rule. Chapters~\ref{ch:02}, \ref{ch:05}.
+\end{description}
+
+\section*{E}
+\begin{description}[style=nextline]
+\item[Effective dimension.] A summary of how variation is distributed across directions, such as participation ratio. It may be noninteger and can change with preprocessing, observation noise, and task sampling. It is not necessarily the dimension of a manifold. Chapter~\ref{ch:01}.
+\item[Embedding.] A map that realizes one space inside another without changing its topology; a smooth embedding is also an immersion and a homeomorphism onto its image. In machine learning, ``embedding'' often means any learned coordinate representation, without these mathematical guarantees. Chapters~\ref{ch:03}, \ref{ch:08}.
+\item[Equilibrium.] A state $x_*$ satisfying $f(x_*)=0$ for a continuous autonomous system. The corresponding trajectory is constant. ``Fixed point'' usually means $F(x_*)=x_*$ for a map and is also commonly used for an ODE equilibrium. Chapter~\ref{ch:02}.
+\end{description}
+
+\section*{F}
+\begin{description}[style=nextline]
+\item[Factor analysis.] A latent Gaussian model $y=\mu+Cz+\eta$ with standard normal latent $z$ and usually diagonal noise covariance for $\eta$. It models shared covariance while allowing feature-specific private variance. Rotations of latent coordinates generally remain unidentifiable. Chapter~\ref{ch:06}.
+\item[Filtration.] A nested family $K_{\epsilon}\subseteq K_{\epsilon'}$ whenever $\epsilon\leq\epsilon'$. Persistent homology tracks classes through the maps induced by these inclusions. The filtration parameter is not necessarily physical time. Chapter~\ref{ch:04}.
+\item[Fixed point.] A point unchanged by a discrete update: $F(x_*)=x_*$. For a driven RNN, this equation must specify the fixed input or augmented dynamics. A numerical minimum of $\norm{F(x)-x}^2$ can have nonzero residual and therefore need not be a fixed point. Chapters~\ref{ch:02}, \ref{ch:10}.
+\item[Flow.] The state-evolution maps $\phi_t$ of an ODE, satisfying $\phi_0=\operatorname{id}$ and $\phi_{t+s}=\phi_t\circ\phi_s$ where defined. Global two-sided flow terminology requires existence in both time directions; a forward evolution may only define a semiflow. Chapter~\ref{ch:02}.
+\end{description}
+
+\section*{G--H}
+\begin{description}[style=nextline]
+\item[Geodesic.] A locally length-minimizing path, or more generally a solution of the geodesic equation, for a specified Riemannian metric. Not every geodesic segment is globally shortest. Graph shortest paths approximate manifold distances only under suitable geometric and sampling conditions. Chapters~\ref{ch:01}, \ref{ch:03}.
+\item[Gradient flow.] Dynamics $\dot x=-\nabla V(x)$ in Euclidean coordinates, or $\dot x=-G(x)^{-1}\nabla V(x)$ for a Riemannian metric tensor $G$. The potential decreases along trajectories. A recurrent network need not admit such a representation. Chapters~\ref{ch:02}, \ref{ch:10}.
+\item[Hausdorff distance.] For nonempty compact sets $A,B$ in a metric space, the maximum of $\sup_{a\in A}\inf_{b\in B}d(a,b)$ and the reverse directed distance. It measures geometric closeness of sets, rather than closeness of corresponding data indices. Chapter~\ref{ch:04}.
+\item[Hidden state.] An internal state of a model. For a vanilla RNN or GRU it is commonly $h_t$; for an LSTM the recurrent state includes both $h_t$ and $c_t$. The word ``hidden'' does not imply that the model state is inaccessible to analysis. Chapter~\ref{ch:10}.
+\item[Homeomorphism.] A continuous bijection with continuous inverse. It preserves topological structure, not distances, angles, or curvature. A distorted ellipse is homeomorphic to a circle but usually not isometric to a unit circle with its usual metric. Chapter~\ref{ch:03}.
+\item[Homology.] The quotient $H_q=\ker\partial_q/\operatorname{im}\partial_{q+1}$. It records cycles modulo boundaries with specified coefficients. Homology is a useful but incomplete invariant of topology. Chapter~\ref{ch:04}.
+\item[Homotopy.] A continuous deformation between two continuous maps, represented by a map depending continuously on a parameter in $[0,1]$. Homotopy equivalence is weaker than homeomorphism: an annulus can retract to a circle without being a one-dimensional manifold. Chapter~\ref{ch:04}.
+\end{description}
+
+\section*{I--K}
+\begin{description}[style=nextline]
+\item[Immersion.] A smooth map whose derivative is injective at every point. It preserves local tangent dimension but may have self-intersections and need not be a global embedding. Chapter~\ref{ch:03}.
+\item[Intrinsic dimension.] The local dimension $d$ of an assumed smooth manifold, or an explicitly defined distributional dimension when a manifold is not assumed. A finite cloud with full-dimensional measurement noise does not literally lie on the noiseless manifold; dimension estimation then targets a scale-dependent model. Chapters~\ref{ch:01}, \ref{ch:03}.
+\item[Invariant set.] A set is forward invariant when $\phi_t(A)\subseteq A$ for all $t\geq0$. For a two-sided flow, invariance means $\phi_t(A)=A$ for all $t$. Neither property implies attraction from outside the set. Chapters~\ref{ch:02}, \ref{ch:05}.
+\item[Isomap.] A method that estimates geodesic distances by shortest paths on a neighborhood graph and then applies classical multidimensional scaling. Disconnected graphs, short-circuit edges, and manifolds that cannot be globally flattened isometrically limit its interpretation. Chapter~\ref{ch:01}.
+\item[Jacobian.] The matrix of first derivatives $J_{ij}=\partial f_i/\partial x_j$. For an ODE it maps small state perturbations to changes in instantaneous velocity; for a discrete map it maps them to next-step perturbations. These uses have different stability boundaries and units. Chapters~\ref{ch:02}, \ref{app:b}.
+\item[Koopman operator.] For a map $F$, the linear operator on observables defined by $(\mathcal K g)(x)=g(F(x))$. Its linearity concerns functions of the state, generally in an infinite-dimensional space; it does not make the original state dynamics linear. Chapter~\ref{ch:05}.
+\end{description}
+
+\section*{L--M}
+\begin{description}[style=nextline]
+\item[Latent variable.] An unobserved variable in a statistical model. A useful latent coordinate need not be a uniquely identifiable physical state. Latent dynamical models specify both an evolution model and an observation model. Chapters~\ref{ch:05}, \ref{ch:06}.
+\item[Limit cycle.] An isolated periodic orbit. An orbitally asymptotically stable limit cycle attracts transversely while phase along the orbit remains neutral for an autonomous oscillator. A continuum of stationary ring-attractor states is not a limit cycle. Chapters~\ref{ch:02}, \ref{ch:07}.
+\item[Linear subspace.] A subset of a vector space closed under vector addition and scalar multiplication. An affine subspace is a translated linear subspace. Both have a global linear description; a general manifold requires local charts. Chapters~\ref{ch:01}, \ref{ch:03}.
+\item[Lyapunov function.] A scalar function used to prove stability through its value and derivative along trajectories, under stated sign and regularity conditions. It need not be physical energy or a potential whose gradient generates the entire vector field. Chapters~\ref{ch:02}, \ref{ch:07}.
+\item[Lyapunov stability.] Initial states sufficiently close to a specified equilibrium or set remain close for all future time. This is a quantified property over a neighborhood of initial conditions, not an observation that one sampled trajectory changes little. Chapter~\ref{ch:02}.
+\item[Manifold.] A Hausdorff, second-countable space locally homeomorphic to $\R^d$, with the stated boundary convention. Smoothness additionally requires compatible smooth charts. A point cloud, a low-rank matrix, and a manifold are distinct objects. Chapter~\ref{ch:03}.
+\item[Metric.] A nonnegative distance satisfying identity of indiscernibles, symmetry, and the triangle inequality. A Riemannian metric is a smoothly varying inner product on tangent spaces and induces a distance by path lengths. These are related but different uses of the word. Chapter~\ref{ch:03}.
+\item[Metastability.] Long residence in regions with occasional transitions, specified relative to an observational time scale and often noise. It does not necessarily mean multiple deterministic attractors; slow transients and hidden inputs can create similar residence patterns. Chapters~\ref{ch:02}, \ref{ch:07}.
+\end{description}
+
+\section*{N--O}
+\begin{description}[style=nextline]
+\item[Neural manifold.] An operational term for low-dimensional structure in neural population activity. Depending on the study, it may mean a fitted linear subspace, nonlinear latent model, or evidence for a particular topology. The mathematical and empirical commitments must be specified. Chapters~\ref{ch:08}, \ref{ch:12}.
+\item[Non-normal matrix.] A matrix $A$ for which $AA^*\ne A^*A$, where $A^*$ is conjugate transpose (ordinary transpose for real matrices). Nonorthogonal eigenvectors can allow transient amplification even when all continuous-time eigenvalues have negative real parts. Eigenvalue stability alone does not bound short-time gain. Chapters~\ref{ch:02}, \ref{ch:07}.
+\item[Null model.] A specified probability model or randomization scheme representing an alternative explanation to be tested. A surrogate should preserve features irrelevant to the tested hypothesis and remove its target structure. There is no universal ``random neural data'' null. Chapters~\ref{ch:09}, \ref{ch:12}.
+\item[Observation map.] A map $y=g(x)$, often with additional noise, from a full or latent state to measurements. Many-to-one maps can hide dynamically relevant information. An autonomous state process can therefore produce observations whose evolution is not autonomous in the observed coordinates. Chapter~\ref{ch:05}.
+\item[Orbit.] The set traced by a state under evolution. A trajectory is commonly the time-parameterized map $t\mapsto x(t)$. Losing time labels can preserve an orbit's shape while losing speed, direction, and other dynamical information. Chapters~\ref{ch:02}, \ref{ch:05}.
+\end{description}
+
+\section*{P--R}
+\begin{description}[style=nextline]
+\item[Participation ratio.] For nonnegative covariance eigenvalues $\gamma_j$ with nonzero total variance, $D_{\mathrm{PR}}=(\sum_j\gamma_j)^2/\sum_j\gamma_j^2$. It is an effective count of variance-carrying directions, between one and the covariance rank. Chapter~\ref{ch:01}.
+\item[Persistence diagram.] A multiset of birth--death pairs for homology classes across a filtration. Points far from the diagonal correspond to long lifetimes in that filtration. An infinite endpoint can mean an essential class or right-censoring by a finite computation threshold; the distinction must be reported. Chapters~\ref{ch:04}, \ref{ch:11}.
+\item[Persistent homology.] Homology together with maps induced by inclusions across scales. It distinguishes features by their lifespan rather than choosing one arbitrary neighborhood threshold. Stability bounds control sensitivity to specified perturbations, not the scientific correctness of a metric or null model. Chapters~\ref{ch:04}, \ref{ch:09}.
+\item[Phase portrait.] A representation of a vector field and its trajectories in state space. A projection of high-dimensional trajectories is not necessarily the phase portrait of a closed low-dimensional autonomous system. Chapters~\ref{ch:02}, \ref{ch:05}.
+\item[Principal component analysis (PCA).] An orthogonal linear projection maximizing retained sample variance or minimizing squared reconstruction error. It is determined by the covariance eigenspaces or data SVD. PCA does not in general recover geodesic distances, topology, or causal variables. Chapters~\ref{ch:01}, \ref{ch:06}.
+\item[Quotient.] A construction identifying objects declared equivalent. In homology, cycles are identified when their difference is a boundary; in a torus construction, points differing by lattice translations are identified. The equivalence relation is part of the definition. Chapters~\ref{ch:04}, \ref{app:d}.
+\item[Riemannian metric.] A positive-definite inner product $g_x(v,w)$ on each tangent space, depending smoothly on $x$. In coordinates it is represented by a positive-definite matrix $G(x)$. Different metrics on the same manifold can give different lengths without changing its topology. Chapter~\ref{ch:03}.
+\end{description}
+
+\section*{S}
+\begin{description}[style=nextline]
+\item[Simplex.] The convex hull of affinely independent vertices, or an abstract finite vertex set when only incidence matters. A triangle is a filled two-simplex; its three-edge boundary is a different simplicial complex. Chapter~\ref{ch:04}.
+\item[Simplicial complex.] A collection of simplices closed under taking faces, with compatible intersections in the geometric formulation. It provides a finite combinatorial object on which boundary operators and homology can be computed. Chapter~\ref{ch:04}.
+\item[Slow manifold.] An invariant or approximately invariant geometric set supporting evolution slow relative to transverse directions, with the precise statement depending on the model. Small speeds in an embedding do not establish a timescale separation or a persistent slow manifold. Chapter~\ref{ch:05}.
+\item[Smoothness.] Differentiability of the stated order; ``smooth'' usually means $C^\infty$. A smooth plotted curve can be an artifact of smoothing noisy observations. A differentiability assumption in a latent model is different from empirical evidence that it holds. Chapters~\ref{ch:03}, \ref{ch:06}.
+\item[Stable manifold.] Near a hyperbolic equilibrium, the smooth manifold of states approaching it in forward time, tangent to the stable generalized spectral subspace. A saddle has a stable manifold even though it is not a locally attracting equilibrium in the full ambient space. Chapter~\ref{ch:05}.
+\item[State.] A collection of variables sufficient to determine evolution, given the declared future input and, for a stochastic model, the evolution law. A population activity vector may omit adaptation, synapses, inputs, or unrecorded neurons and therefore need not be a complete state. Chapters~\ref{ch:02}, \ref{ch:10}.
+\item[Stochastic stability.] A family of probabilistic notions, including stability in probability, moment stability, and properties of invariant distributions. The definition must be stated. A noisy system need not converge to a deterministic point even when its drift has a stable equilibrium. Chapters~\ref{ch:02}, \ref{app:d}.
+\end{description}
+
+\section*{T--V}
+\begin{description}[style=nextline]
+\item[Tangent space.] The vector space of tangent directions $T_xM$ at a point of a smooth manifold, defined by derivatives of curves or equivalently by derivations. It is a local linear object and need not approximate the manifold well over a large neighborhood. Chapter~\ref{ch:03}.
+\item[Topology.] The structure specifying open sets, continuity, and qualitative properties such as connectedness. It ignores a particular metric's distances while retaining more information than a list of Betti numbers. A visualization is not a complete topological invariant. Chapters~\ref{ch:03}, \ref{ch:04}.
+\item[Transient dynamics.] Evolution over finite time before asymptotic behavior dominates. Transients can support computation, amplify signals, or retain information; they do not require a distinct attractor for every represented item. Chapters~\ref{ch:07}, \ref{ch:10}.
+\item[t-SNE.] A nonlinear embedding method matching high-dimensional neighborhood probabilities to a heavy-tailed low-dimensional distribution by minimizing a directed Kullback--Leibler divergence. Cluster separation and global distances in its output require special caution. Chapter~\ref{ch:01}.
+\item[UMAP.] A nonlinear embedding method constructing a locally scaled neighborhood graph and optimizing a low-dimensional fuzzy-graph representation. Its output depends on the metric, neighborhood size, optimization, and other parameters. Its name does not certify that data form a manifold. Chapters~\ref{ch:01}, \ref{ch:11}.
+\item[Validation.] A procedure assessing a prespecified target on data or interventions independent of the fitting choices, as appropriate. Reusing training observations, selecting a flattering projection, or tuning to the final test statistic weakens the inference. Chapters~\ref{ch:06}, \ref{ch:12}.
+\item[Vietoris--Rips complex.] A simplex is included when all pairwise distances between its vertices are at most $\epsilon$. This is a clique construction from the threshold graph. Here $\epsilon$ is maximum edge length. It is not identical to a \v{C}ech complex at the same numerical scale. Chapter~\ref{ch:04}.
+\end{description}

@@ -1,0 +1,18 @@
+# LaTeX build outputs (keep the released textbook PDF)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+# Python caches and environments
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.DS_Store

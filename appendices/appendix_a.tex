@@ -1,0 +1,147 @@
+\chapter{Linear Algebra Reference}\label{app:a}
+
+\section*{Purpose and learning objectives}
+This appendix provides the calculations used repeatedly in the book. Readers should be able to check dimensions, distinguish a subspace from a list of coordinates, compute a projection, interpret a singular value, and differentiate a quadratic loss. Chapter~\ref{ch:01} develops dimensionality reduction from these ingredients. \citet{ev_axler2024} is a more extensive reference.
+
+\section{Vectors, maps, and coordinates}
+A real vector space is a set with addition and real scalar multiplication satisfying the familiar distributive, associative, and identity rules. Its elements need not be arrows: functions and polynomials also form vector spaces. A subspace contains zero and is closed under addition and scalar multiplication.
+
+Vectors \(v_1,\ldots,v_k\) are linearly independent if
+\[
+\sum_{j=1}^k a_jv_j=0\quad\Longrightarrow\quad a_1=\cdots=a_k=0.
+\]
+Their span is the set of all such linear combinations. A basis is an independent spanning list; its length is the dimension. Coordinates are coefficients in a chosen basis, not properties of a vector independently of that basis.
+
+A linear map \(A:\R^p\to\R^m\) satisfies \(A(ax+by)=aAx+bAy\) and is represented by an \(m\times p\) matrix. Its columns are the images of the standard basis vectors. Its image and null space are
+\[
+\operatorname{im}A=\{Ax:x\in\R^p\},\qquad
+\ker A=\{x:Ax=0\}.
+\]
+The rank is \(\dim(\operatorname{im}A)\); the nullity is \(\dim(\ker A)\).
+
+\begin{theorem}[Rank--nullity]
+For \(A:\R^p\to\R^m\), \(\rank A+\dim\ker A=p\).
+\end{theorem}
+\begin{proof}[Proof sketch]
+Extend a basis \(v_1,\ldots,v_r\) of the kernel to a basis of the domain. The images of the added basis vectors span the image; they are independent because a relation among their images would place a nontrivial combination of the added vectors in the kernel. There are \(p-r\) such vectors.
+\end{proof}
+
+\begin{example}
+For
+\[
+A=\begin{pmatrix}1&1&0\\0&0&1\end{pmatrix},
+\]
+\(Ax=(x_1+x_2,x_3)^\top\). The image is all of \(\R^2\), and the null space is \(\operatorname{span}\{(1,-1,0)^\top\}\). A two-dimensional readout cannot recover which of the first two coordinates supplied their sum.
+\end{example}
+
+\section{Inner products, norms, and orthogonality}
+The Euclidean inner product is \(\ip{x}{y}=x^\top y\). Its induced norm is \(\norm{x}_2=\sqrt{x^\top x}\); vectors are orthogonal when their inner product is zero. The Cauchy--Schwarz inequality states
+\[
+\abs{x^\top y}\leq\norm x_2\norm y_2.
+\]
+For \(y\ne0\), expand \(\norm{x-ty}^2\geq0\) and minimize over \(t\) to obtain the inequality. This proof also explains the projection coefficient \(t=x^\top y/(y^\top y)\).
+
+An orthonormal matrix \(Q\in\R^{p\times k}\) satisfies \(Q^\top Q=I_k\). Unless \(k=p\), generally \(QQ^\top\ne I_p\). Instead \(QQ^\top\) is the projector onto the column space of \(Q\):
+\[
+P^2=P,\qquad P^\top=P,\qquad
+x=Px+(I-P)x,\qquad (Px)^\top(I-P)x=0.
+\]
+The last identity gives the Pythagorean decomposition \(\norm x^2=\norm{Px}^2+\norm{(I-P)x}^2\).
+
+\section{Least squares and orthogonal projection}
+Given \(A\in\R^{n\times k}\) and \(y\in\R^n\), minimize
+\[
+L(w)=\frac12\norm{Aw-y}_2^2.
+\]
+Expanding the quadratic and differentiating gives
+\[
+\nabla_wL=A^\top(Aw-y).
+\]
+At a minimizer, the residual is orthogonal to every column of \(A\). If the columns are independent,
+\[
+\widehat w=(A^\top A)^{-1}A^\top y,\qquad
+\widehat y=A(A^\top A)^{-1}A^\top y.
+\]
+The fitted vector \(\widehat y\) is unique even when the coefficients are not. For a rank-deficient design, a pseudoinverse selects the minimum-Euclidean-norm solution. In numerical work, QR or SVD methods are generally preferable to forming the inverse of \(A^\top A\), whose conditioning can be substantially worse.
+
+\begin{example}[Projection with numbers]
+Project \(y=(2,0)^\top\) onto the line spanned by \(a=(1,1)^\top\). The coefficient is \(a^\top y/a^\top a=1\), so \(\widehat y=(1,1)^\top\). The residual \((1,-1)^\top\) is orthogonal to \(a\), and the squared norms satisfy \(4=2+2\).
+\end{example}
+
+\section{Eigenvalues and the spectral theorem}
+For a square matrix \(A\), an eigenvector \(v\ne0\) satisfies \(Av=\lambda v\). An eigenvalue is a scalar \(\lambda\) for which such a vector exists. General real matrices can have complex eigenvalues, defective eigenspaces, and nonorthogonal eigenvectors.
+
+\begin{theorem}[Real spectral theorem]
+Every real symmetric matrix \(A=A^\top\) has an orthonormal eigenbasis. Thus
+\[
+A=Q\Lambda Q^\top,
+\]
+where \(Q^\top Q=I\) and \(\Lambda\) is real diagonal.
+\end{theorem}
+Symmetry is essential. For a proof sketch, maximize \(x^\top Ax\) on the compact unit sphere. A Lagrange multiplier gives an eigenvector. Its orthogonal complement is invariant under \(A\); repeat on that complement. The result implies that the extrema of the Rayleigh quotient \(x^\top Ax/(x^\top x)\) are the smallest and largest eigenvalues.
+
+For \(A=\begin{pmatrix}2&1\\1&2\end{pmatrix}\), the normalized eigenvectors \((1,1)^\top/\sqrt2\) and \((1,-1)^\top/\sqrt2\) have eigenvalues \(3\) and \(1\). The same eigenvectors diagonalize the quadratic form.
+
+\section{Singular value decomposition}
+Every real \(n\times p\) matrix has an SVD
+\[
+A=U\Sigma V^\top,
+\]
+with orthogonal \(U,V\) and nonnegative singular values \(\sigma_1\geq\cdots\geq\sigma_r>0\) on the rectangular diagonal of \(\Sigma\). Here \(r=\rank A\). The right singular vectors \(v_j\) satisfy \(A^\top A v_j=\sigma_j^2v_j\), and \(Av_j=\sigma_ju_j\).
+
+One construction diagonalizes the positive semidefinite matrix \(A^\top A\), then sets \(u_j=Av_j/\sigma_j\) for each positive singular value and completes orthonormal bases. Unlike eigenvalue decomposition, the SVD applies to rectangular matrices and always exists.
+
+The Frobenius norm is
+\[
+\norm A_F^2=\sum_{ij}A_{ij}^2=\tr(A^\top A)=\sum_j\sigma_j^2.
+\]
+The operator norm induced by the Euclidean norm is
+\[
+\norm A_2=\max_{\norm x_2=1}\norm{Ax}_2=\sigma_1.
+\]
+The pseudoinverse is \(A^+=V\Sigma^+U^\top\), where positive singular values are inverted and zero singular values remain zero. Tiny singular values make inversion sensitive; a numerical threshold or regularization is then a modeling choice.
+
+\section{Positive definiteness and quadratic forms}
+A real symmetric matrix \(M\) is positive semidefinite if \(x^\top Mx\geq0\) for all \(x\), and positive definite if the inequality is strict for every nonzero \(x\). By the spectral theorem, these conditions mean respectively nonnegative and positive eigenvalues.
+
+Covariance matrices are positive semidefinite because
+\[
+x^\top\Cov(Y)x=\Var(x^\top Y)\geq0.
+\]
+They need not be invertible. If one measured channel is an exact linear combination of others, there is a zero-variance direction. A Mahalanobis distance with \(M=\Sigma^{-1}\) is defined as
+\[
+d_M(x,y)^2=(x-y)^\top M(x-y).
+\]
+Positive definiteness makes this a genuine squared metric distance; a singular \(M\) can assign zero distance to distinct points.
+
+\section{Matrix calculus and shape checks}
+For a scalar function \(L(W)\), define its gradient through
+\[
+\dd L=\tr\big((\nabla_WL)^\top\dd W\big).
+\]
+This convention makes the gradient the same shape as \(W\). The identities
+\[
+\dd(AB)=(\dd A)B+A\,\dd B,\quad
+\dd(W^\top)=(\dd W)^\top,\quad
+\tr(AB)=\tr(BA)
+\]
+are sufficient for many derivations. Cyclic permutation inside a trace is allowed when products are defined; arbitrary rearrangement is not.
+
+For \(L(W)=\frac12\norm{XW-Y}_F^2\), let \(E=XW-Y\). Then
+\[
+\dd L=\tr(E^\top X\,\dd W)
+=\tr\big((X^\top E)^\top\dd W\big),
+\qquad \nabla_WL=X^\top(XW-Y).
+\]
+If \(X\) is \(n\times p\) and \(W\) is \(p\times q\), this gradient is \(p\times q\), as required.
+
+For \(f:\R^p\to\R^m\), the Jacobian has entries \(J_{ij}=\partial f_i/\partial x_j\). For scalar \(L\), the Hessian has entries \(H_{ij}=\partial^2L/\partial x_i\partial x_j\). If the second partial derivatives are continuous, \(H\) is symmetric. For \(L(x)=\frac12x^\top Mx\), the gradient is \((M+M^\top)x/2\); it simplifies to \(Mx\) only when \(M\) is symmetric.
+
+\section*{Exercises and quick checks}
+\begin{enumerate}
+\item \textbf{Introductory.} Find the rank and null space of \(\begin{pmatrix}1&2\\2&4\end{pmatrix}\).
+\item \textbf{Intermediate.} Verify directly that \(P=A(A^\top A)^{-1}A^\top\) is symmetric and idempotent when \(A\) has independent columns.
+\item \textbf{Advanced.} Derive the ridge solution \((A^\top A+\lambda I)^{-1}A^\top y\) and express its shrinkage in the singular-vector basis.
+\end{enumerate}
+\section*{Summary and further reading}
+The essential checks are shapes, symmetry, and limiting cases. If \(A=I\), least squares should return \(y\); if a projection retains the full space, its residual should vanish; and a covariance quadratic form should never be negative apart from numerical error. A common misconception is that every square matrix has an orthogonal eigenbasis: this is guaranteed for real symmetric matrices, whereas general matrices require different qualifications. For a systematic development, see \citet{ev_axler2024}; return to Chapter~\ref{ch:01} for the connection to PCA.

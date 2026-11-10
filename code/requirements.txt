@@ -1,0 +1,10 @@
+# Supported API ranges; the exact executed environment is recorded separately.
+# Only requirements-tested.txt versions were executed for this edition.
+numpy>=2.1,<3
+scipy>=1.14,<2
+scikit-learn>=1.6,<2
+matplotlib>=3.9,<4
+torch>=2.6,<3
+ripser>=0.6.10,<0.7
+persim>=0.3.8,<0.5
+umap-learn>=0.5.7,<0.7

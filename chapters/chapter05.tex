@@ -1,0 +1,171 @@
+\chapter{Connecting dynamics, geometry, and topology}\label{ch:05}
+\begin{insight}{Learning objectives}
+Distinguish occupied geometry from invariant geometry; calculate a simple invariant manifold; interpret stable, center, and slow manifolds without confusing them with attractors; derive a reduced dynamics condition; and recognize the assumptions behind latent dynamics and Koopman-based analyses.
+\end{insight}
+
+\section{The same shape can support different computations}
+On the circle, each of the rules $\dot\theta=0$, $\dot\theta=1$, and $\dot\theta=\sin\theta$ has the same state-space topology. The first stores a continuous initial condition, the second rotates indefinitely, and the third has attracting and repelling angular equilibria. A sampling distribution can obscure these differences further: equal sampling of angles need not reflect the stationary occupancy of any one rule.
+
+Conversely, one dynamical system can generate different observed shapes under different measurement maps. A periodic orbit observed as $(\cos\theta,\sin\theta)$ is a circle; observed as $\cos\theta$ it is an interval with hidden phase ambiguity. The geometry of observations and the geometry of the underlying state are related by a map, not by identity. This chapter combines the previous mathematical tools to make that relationship explicit.
+
+\section{Invariant manifolds and tangency}
+A smooth submanifold $M$ is invariant for a flow when a trajectory starting on $M$ remains there for all times for which the relevant flow is defined. For forward-time questions one can use forward invariance. A necessary local condition is
+\begin{equation}\label{eq:tangent-invariance}
+f(x)\in T_xM\qquad\text{for every }x\in M.
+\end{equation}
+For a smooth embedded manifold without boundary, tangency and uniqueness imply local invariance: trajectories remain in the manifold for as long as the solution of the restricted vector field exists. To conclude invariance throughout the ambient solution's lifetime, assume the manifold is closed in the ambient domain or separately exclude finite-time escape through missing endpoints or ends. A boundary requires additional care: tangency to the ambient manifold does not prevent flow from leaving a chosen bounded patch.
+
+If $M=\{x:F(x)=0\}$ is a regular level set, its tangent space is $\ker DF(x)$, so the condition becomes $DF(x)f(x)=0$ on $M$. For the circle $F(x,y)=x^2+y^2-1$ and rotation $f=(-y,x)$, this expression is $2x(-y)+2yx=0$. For pure radial expansion $f=(x,y)$, it is 2 on the unit circle, so the circle is not invariant even though individual trajectories cross it.
+
+\subsection{Dynamics in local coordinates}
+Let $q:V\subset\R^d\to M$ be a regular local parameterization. A reduced state $z$ must obey
+\begin{equation}\label{eq:reduced-invariance}
+Dq(z)\dot z=f(q(z)).
+\end{equation}
+This is a consistency equation, not merely a regression objective. If $f(q(z))$ lies in the column space of $Dq(z)$, the intrinsic velocity is uniquely
+\begin{equation}
+\dot z=\{Dq(z)^TDq(z)\}^{-1}Dq(z)^Tf(q(z)).
+\end{equation}
+If tangency fails, this formula projects velocity onto the tangent space and defines an approximation with a residual normal component. A small reconstruction error for $q$ says nothing by itself about the size of that dynamical residual.
+
+\begin{example}[A curve is invariant only for a compatible vector field]
+Let $q(z)=(z,z^2)$ and choose $\dot z=-z$. Then $Dq(z)\dot z=(-z,-2z^2)$. The planar system $\dot x=-x$, $\dot y=-2y$ therefore leaves the parabola $y=x^2$ invariant. The system $\dot x=-x$, $\dot y=-y$ does not: its velocity on the parabola is $(-x,-x^2)$, inconsistent with the required tangent velocity $(-x,-2x^2)$ except at zero.
+\end{example}
+Both systems can have observations initially lying exactly on the parabola. Only one preserves it. A static point cloud cannot decide between them.
+
+\section{Stable and unstable manifolds of equilibria}
+At a hyperbolic equilibrium, linearization separates directions that contract forward in time from those that expand. Nonlinear systems have corresponding curved invariant sets.
+
+\begin{theorem}[Local stable manifold theorem, introductory form]\label{thm:stable-manifold}
+Let $f$ be $C^r$, with finite $r\geq1$, near an equilibrium $x_*$, and suppose $Df(x_*)$ has no eigenvalues with zero real part. There is a local $C^r$ stable manifold tangent at $x_*$ to the generalized spectral subspace for eigenvalues with negative real part, and a local unstable manifold tangent to the positive-real-part generalized spectral subspace. The stable manifold consists locally of points whose forward trajectories remain nearby and converge to $x_*$; the unstable manifold has the analogous backward-time property. Their dimensions equal those of the respective generalized spectral subspaces. Such a subspace is spanned by the relevant generalized eigenvectors, taking real and imaginary parts for complex conjugate pairs.
+\end{theorem}
+This is a local embedded-manifold statement. Global continuations may have more complicated geometry and are naturally treated as immersed manifolds. A proof uses contraction estimates for the nonlinear remainder and a fixed-point construction on decaying paths; the full theorem is beyond the elementary linearization proof, with details in \citet{teschl2012}.
+
+For $\dot x=-x$, $\dot y=y$, the stable manifold is the horizontal axis and the unstable manifold the vertical axis. The stable manifold is \emph{not an attractor}: a small transverse perturbation grows. ``Stable'' describes convergence of trajectories lying on that manifold toward the equilibrium, not attraction toward the manifold from every surrounding direction.
+
+\begin{example}[A curved stable manifold computed directly]
+For $\dot x=-x$, $\dot y=y-x^2$, seek an invariant graph $y=h(x)$ through zero. Tangency requires $h'(x)(-x)=h(x)-x^2$. The solution $h(x)=x^2/3$ satisfies this equation exactly. On this curve, $x(t)=x_0e^{-t}$ and $y(t)=x_0^2e^{-2t}/3$, so both approach zero. Let $w=y-x^2/3$. Differentiating gives $\dot w=w$, proving that deviations from the stable manifold grow. The curve has stable motion along it and unstable motion transverse to it.
+\end{example}
+
+A heteroclinic orbit approaches one equilibrium as $t\to-\infty$ and a different equilibrium as $t\to+\infty$. It lies in an intersection of an unstable manifold and a stable manifold. A homoclinic orbit returns asymptotically to the same equilibrium. Such connecting trajectories help explain sequential dynamics, but a finite trajectory visiting several slow regions does not establish an exact heteroclinic connection. Parameters and symmetries may be needed for the relevant manifold intersections to persist.
+
+\section{Center manifolds: when linearization cannot decide}
+Zero-real-part eigenvalues identify directions in which linear terms do not resolve growth or decay. A center manifold provides a local nonlinear reduction for those directions. Under suitable smoothness, a local center manifold exists tangent to the center generalized spectral subspace. It need not be unique, and it need not attract if unstable directions are present. When all complementary directions are strictly stable, its reduced dynamics can determine local stability. These statements concern sufficiently small neighborhoods, not arbitrary global trajectories.
+
+Consider
+\begin{equation}\label{eq:center-example}
+\dot x=-xy,\qquad \dot y=-y+x^2.
+\end{equation}
+At zero the Jacobian has eigenvalues $0$ and $-1$. Seek a center manifold $y=h(x)$ with $h(0)=h'(0)=0$. Invariance gives
+\begin{equation}
+h'(x)[-xh(x)]=-h(x)+x^2.
+\end{equation}
+Write $h(x)=a_2x^2+a_4x^4+O(x^6)$. Matching the quadratic term gives $a_2=1$; matching the quartic term gives $-2=-a_4$, so $a_4=2$. Thus
+\begin{equation}
+h(x)=x^2+2x^4+O(x^6),\qquad
+\dot x=-x^3-2x^5+O(x^7).
+\end{equation}
+The leading cubic term restores toward zero on both sides. The stable transverse direction then supports local asymptotic stability of the equilibrium, despite the inconclusive linearization.
+
+The nullcline $\dot y=0$ is $y=x^2$, whereas the invariant graph includes higher-order corrections. A nullcline is a set where one component of velocity vanishes; it is not generally an invariant manifold. This distinction matters whenever a fitted low-speed curve is called a dynamical manifold. The power-series calculation is a local asymptotic approximation, not a globally valid closed-form solution.
+
+\section{Slow manifolds and separated timescales}
+Suppose $x$ changes on an order-one timescale while $y$ relaxes much faster:
+\begin{equation}\label{eq:slow-fast}
+\dot x=f(x,y),\qquad \epsilon\dot y=g(x,y),\qquad0<\epsilon\ll1.
+\end{equation}
+Setting $\epsilon=0$ gives the \emph{critical manifold} $M_0=\{g=0\}$. This algebraic limit is singular: the differential equation for $y$ disappears. Solving $g=0$ and substituting into $f$ gives a leading-order approximation only when the fast dynamics actually relaxes toward the selected branch.
+
+Normal hyperbolicity means that contraction or expansion normal to a candidate invariant manifold dominates the tangent rates. A central persistence result says, roughly, that compact normally hyperbolic pieces of a smooth critical manifold persist for small $\epsilon$ as nearby locally invariant slow manifolds; boundary and invariance conditions must be handled explicitly. Loss of the normal spectral gap, for example near a fold, invalidates this simple reduction. This is the content and scope motivating geometric singular perturbation theory \citep{fenichel1979}; it is not a theorem that every small derivative defines a slow manifold.
+
+\begin{example}[An exact slow graph and its error]\label{ex:slow-graph}
+Take $\dot x=-x$ and $\epsilon\dot y=x-y$, with $0<\epsilon<1$. The critical manifold is $y=x$. Seek an invariant line $y=ax$. The condition $\epsilon a\dot x=x-ax$ gives $-\epsilon a=1-a$, hence $a=(1-\epsilon)^{-1}$. Therefore the exact invariant line is $y=x/(1-\epsilon)$. Let $w=y-x/(1-\epsilon)$; direct differentiation yields $\dot w=-w/\epsilon$. Deviations decay rapidly, whereas motion along the line decays as $e^{-t}$. Replacing the invariant line with the nullcline $y=x$ incurs an order-$\epsilon$ slope error for small $\epsilon$.
+\end{example}
+
+A small principal-component variance in normal directions may be consistent with fast contraction, but it can also result from small external forcing, restricted initial conditions, or a measurement map that suppresses those directions. To infer timescale separation, one needs temporal or perturbational evidence as well as thin geometry.
+
+\section{Attractor geometry need not be manifold geometry}
+An attracting equilibrium is a zero-dimensional manifold. A regular periodic orbit is a one-dimensional manifold, usually a circle. A continuous family of equilibria may form a manifold that attracts transversely but is neutral along its tangent directions. Other attractors have fractal or singular structure and are not smooth manifolds. The word attractor specifies asymptotic dynamics; the word manifold specifies local geometry. Neither implies the other.
+
+Consider polar dynamics $\dot r=-(r-1)$ and $\dot\theta=0$ on an annular region. The circle $r=1$ attracts as a set, while each angle remains constant. Every point on the circle is an equilibrium but no individual point attracts neighboring angles. Change to $\dot\theta=\omega\ne0$, and the same circle becomes an attracting periodic orbit. Its topology stays the same while its computation changes from storing a phase to advancing a phase.
+
+A finite trajectory has its own geometry. A non-self-intersecting smooth segment is locally a curve even when it traverses a high-dimensional state space. Sampling a single trajectory for a limited duration can therefore produce an apparently low-dimensional set without a low-dimensional invariant manifold governing all possible states. Repeated initial conditions, perturbations, and broader task coverage help expose this distinction.
+
+\section{Observation geometry and dynamical closure}
+Suppose the true state is $x$, with $\dot x=f(x)$, and observations are $y=g(x)$. The chain rule gives
+\begin{equation}\label{eq:observation-velocity}
+\dot y=Dg(x)f(x).
+\end{equation}
+A closed autonomous observation model $\dot y=F(y)$ exists only if this velocity depends on $x$ solely through $y$. In particular, whenever $g(x_1)=g(x_2)$ one needs
+\begin{equation}\label{eq:closure-condition}
+Dg(x_1)f(x_1)=Dg(x_2)f(x_2).
+\end{equation}
+This is a strong condition. If two hidden states produce identical observations but different future velocities, observation-space dynamics is not single-valued. Additional state variables, delays, or explicit inputs are needed.
+
+\begin{example}[A circle projected to a line loses state information]
+Let $\dot\theta=1$ and $y=\cos\theta$. The phases $\theta$ and $2\pi-\theta$ have identical $y$ but opposite $\dot y=-\sin\theta$. No single-valued function $F(y)$ can describe the evolution on the whole interval. The pair $(y,\dot y)$ determines the phase uniquely modulo $2\pi$. A one-dimensional observed cloud can therefore conceal a state variable needed for prediction.
+\end{example}
+
+If $g$ is a smooth embedding on the relevant invariant set, its inverse there permits a well-defined transformed vector field. Smooth invertible coordinate changes preserve qualitative orbit structure but need not preserve Euclidean distances, PCA spectra, or numerical Jacobian entries. At equilibria, corresponding Jacobians are similar and have identical eigenvalues under a time-preserving smooth conjugacy. Rescaling time changes rates, even when the same geometric orbits are retained.
+
+Delay coordinates $[y(t),y(t-\tau),\ldots]$ can sometimes recover state information under generic deterministic observability and sampling assumptions. Such embedding theorems require conditions on the dynamical system, observation function, and embedding dimension; they do not guarantee recovery for arbitrary neural recordings with nonstationary inputs and noise. Delays can also introduce strong trivial temporal correlations. They are a model choice to validate, rather than a universal repair for missing state.
+
+\section{Latent dynamical models and identifiability}
+A latent state-space model combines evolution and observation:
+\begin{equation}\label{eq:latent-dynamics}
+z_{t+1}=F_\theta(z_t,u_t)+\eta_t,\qquad
+y_t\sim p_\theta(y_t\mid z_t).
+\end{equation}
+Here $z_t$ is unobserved, $u_t$ is observed input, $\eta_t$ process noise, and $p_\theta$ an observation distribution. A low latent dimension is an architectural assumption unless supported by model comparison. Smooth latent trajectories may arise from the prior or regularizer, and not only from evidence in observations.
+
+Coordinates are often nonidentifiable: for an invertible transformation $q$, setting $\widetilde z=q(z)$ and transforming both the transition and observation maps can leave the observable distribution unchanged. Thus individual latent axes need not have unique biological meanings. Geometry based on a chosen latent Euclidean metric can change under this reparameterization. Identifiable predictions, such as held-out observations or responses to interventions, deserve more weight than arbitrary coordinate labels.
+
+A model should be evaluated beyond one-step accuracy if the claim concerns dynamics. Useful checks include held-out trajectories, prediction under new inputs, perturbation responses, uncertainty calibration, and whether residuals retain systematic history dependence. An input-driven model and an autonomous recurrent model may predict the same familiar trials; separating them requires conditions under which their predictions differ.
+
+\section{Advanced extension: Koopman operators}
+The state evolution of a nonlinear system need not be linear, but its action on functions is linear. For a discrete map $x_{t+1}=F(x_t)$, define the Koopman operator on scalar observables $g$ by
+\begin{equation}\label{eq:koopman}
+(\mathcal K g)(x)=g(F(x)).
+\end{equation}
+Linearity follows directly: $\mathcal K(ag+bh)=a\mathcal Kg+b\mathcal Kh$. The operator acts on a usually infinite-dimensional function space, rather than on the finite-dimensional state vector. This distinction removes the apparent paradox of a linear description of nonlinear motion. Koopman's original construction arose in Hamiltonian dynamics \citep{koopman1931}; modern data-driven constructions often use more general function spaces.
+
+A Koopman eigenfunction satisfies $\mathcal K\psi=\lambda\psi$, so $\psi(x_t)=\lambda^t\psi(x_0)$. For continuous flow, the generator acts as $\mathcal Lg=\nabla g\cdot f$ on sufficiently differentiable observables. Choosing finitely many observables closes exactly only if their span is invariant under the operator.
+
+\begin{example}[A finite nonlinear lift that really closes]
+For
+$\dot x_1=\mu x_1$ and $\dot x_2=\lambda(x_2-x_1^2)$,
+choose $g=(x_1,x_2,x_1^2)^T$. Then
+\begin{equation}
+\dot g=\begin{bmatrix}\mu&0&0\\0&\lambda&-\lambda\\0&0&2\mu\end{bmatrix}g.
+\end{equation}
+The third observable evolves as $2x_1\dot x_1=2\mu x_1^2$, so the lifted system closes. This is an exact special construction; adding a generic nonlinear term can generate an unending sequence of required observables.
+\end{example}
+Finding useful finite invariant observable spaces is restrictive, and finite fitted lifts should generally be understood as approximations \citep{brunton2016koopman}. The linearity of the Koopman operator does not guarantee that a small linear latent model captures every nonlinear system globally.
+
+\section{Advanced extension: dynamic mode decomposition}
+For consecutive column snapshots, let $Y=[y_0,\ldots,y_{m-1}]$ and $Y_+=[y_1,\ldots,y_m]$. Dynamic mode decomposition (DMD) begins with the least-squares map
+\begin{equation}\label{eq:dmd}
+A_*=\argmin_A\norm{Y_+-AY}_F^2=Y_+Y^\dagger,
+\end{equation}
+where $Y^\dagger$ is the Moore--Penrose pseudoinverse; this is the minimum-norm minimizer if it is not unique. SVD truncation gives a smaller operator for numerical stability, and its eigenpairs summarize exponential and oscillatory patterns in the chosen snapshots \citep{schmid2010}. For a discrete eigenvalue $\lambda$, a continuous rate may be reported as $\log\lambda/\Delta t$, but the complex logarithm has branch ambiguity and frequencies are limited by sampling.
+
+DMD differs from PCA: PCA optimizes static reconstruction, while DMD fits temporal progression. Neither by itself proves causal recurrence. Observation noise in both $Y$ and $Y_+$ creates an errors-in-variables problem; hidden inputs can induce apparent modes; nonstationarity invalidates a single operator. A precise Koopman interpretation requires adequate observables, appropriate sampling, and a justified limiting or invariant-subspace argument. A good least-squares fit is evidence about predictive approximation on the sampled distribution.
+
+\section{A practical logic for combining the three subjects}
+A defensible chain of inference proceeds by separate questions. First ask which low-dimensional geometric model reconstructs or predicts held-out observations. Then ask whether its local neighborhoods and global topology are stable under reasonable sampling and metric choices. Next ask whether temporal evolution closes in the inferred state and whether nearby trajectories contract, expand, or remain neutral. Finally ask whether perturbations or competing-model tests support the proposed neural computation.
+
+These questions can disagree without contradiction. A robust ring topology can coexist with externally driven motion. A useful low-rank state-space model can lack a smooth manifold interpretation at transitions. A fully known RNN can have verified local attractors while its familiar task trajectories occupy a different transient region. The correct scientific conclusion states which link has evidence and which remains a hypothesis.
+
+\section{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} For a circle, compare $\dot\theta=0$, $\dot\theta=1$, and $\dot\theta=\sin\theta$. Identify the fixed points and their local stability without changing the underlying topology.
+\item \textbf{Introductory.} Check tangency of $(-y,x)$ and $(x,y)$ to $x^2+y^2=1$ using $DF\,f$.
+\item \textbf{Intermediate.} Verify the curved stable manifold $y=x^2/3$ and derive the transverse equation $\dot w=w$.
+\item \textbf{Intermediate.} Reproduce the center-manifold calculation for \eqref{eq:center-example} through order $x^4$. Explain why the nullcline and invariant manifold differ.
+\item \textbf{Intermediate.} Derive the exact slow graph in Example~\ref{ex:slow-graph} and quantify its deviation from the critical manifold for $|x|\leq1$.
+\item \textbf{Advanced.} Prove the necessity of \eqref{eq:closure-condition}. Construct a hidden-state process for which closure fails even though observed data lie near a smooth line.
+\item \textbf{Advanced.} Simulate a driven linear system and fit autonomous DMD. Propose a control analysis that distinguishes input-induced oscillation from an internally generated oscillator.
+\end{enumerate}
+
+\section{Summary and further reading}
+Invariant manifolds concern tangency and dynamical closure, whereas fitted manifolds concern observation geometry. Stable, center, and slow manifolds solve different local reduction problems. An observation map can obscure state and alter geometry, and a latent model can introduce its own regularity assumptions. Koopman operators and DMD add useful temporal tools but require careful finite-dimensional interpretations. Further study can follow \citet{teschl2012} for invariant-manifold theory, \citet{fenichel1979} for slow-fast systems, and \citet{schmid2010,brunton2016koopman} for data-driven operator methods.

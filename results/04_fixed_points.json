@@ -1,0 +1,62 @@
+{
+  "tutorial": "04_fixed_points",
+  "seed": 17,
+  "versions": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "matplotlib": "3.10.8",
+    "torch": "2.15.0+cpu",
+    "ripser": "0.6.15",
+    "persim": "0.4.1",
+    "umap-learn": "0.6.0",
+    "numba": "0.68.1"
+  },
+  "metrics": {
+    "tau": 1.0,
+    "fixed_points": [
+      {
+        "point": [
+          -1.2878394551087489,
+          3.660761972062563e-10
+        ],
+        "residual": 1.419865573286369e-10,
+        "jacobian_eigenvalues": [
+          -0.6056869746020006,
+          -0.30000000000000004
+        ],
+        "continuous_stable": true,
+        "euler_dt4_spectral_radius": 1.4227478984080024
+      },
+      {
+        "point": [
+          0.0,
+          0.0
+        ],
+        "residual": 0.0,
+        "jacobian_eigenvalues": [
+          0.5,
+          -0.30000000000000004
+        ],
+        "continuous_stable": false,
+        "euler_dt4_spectral_radius": 3.0
+      },
+      {
+        "point": [
+          1.2878394549501337,
+          -1.1679088023132205e-11
+        ],
+        "residual": 7.014051629127699e-12,
+        "jacobian_eigenvalues": [
+          -0.6056869744946052,
+          -0.30000000000000004
+        ],
+        "continuous_stable": true,
+        "euler_dt4_spectral_radius": 1.4227478979784207
+      }
+    ],
+    "search_initializations": 70,
+    "global_completeness": "not certified by multistart search"
+  }
+}

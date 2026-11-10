@@ -1,0 +1,67 @@
+{
+  "tutorial": "06_manifold_clouds",
+  "seed": 17,
+  "versions": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "matplotlib": "3.10.8",
+    "torch": "2.15.0+cpu",
+    "ripser": "0.6.15",
+    "persim": "0.4.1",
+    "umap-learn": "0.6.0",
+    "numba": "0.68.1"
+  },
+  "metrics": {
+    "rips_max_edge_length": 2.3,
+    "coefficient_field": 2,
+    "datasets": {
+      "Circle": {
+        "n": 160,
+        "ambient": 2,
+        "longest_finite_H1": 1.472797840833664,
+        "longest_finite_H2": 0.0539628267288208,
+        "essential_or_right_censored_counts": [
+          1,
+          0,
+          0
+        ]
+      },
+      "Sphere": {
+        "n": 150,
+        "ambient": 3,
+        "longest_finite_H1": 0.28718727827072144,
+        "longest_finite_H2": 0.9163219928741455,
+        "essential_or_right_censored_counts": [
+          1,
+          0,
+          0
+        ]
+      },
+      "Product torus": {
+        "n": 196,
+        "ambient": 4,
+        "longest_finite_H1": 1.317680448293686,
+        "longest_finite_H2": 1.1724019050598145,
+        "essential_or_right_censored_counts": [
+          1,
+          0,
+          0
+        ]
+      },
+      "Filled disk": {
+        "n": 160,
+        "ambient": 2,
+        "longest_finite_H1": 0.26019372045993805,
+        "longest_finite_H2": 0.007271230220794678,
+        "essential_or_right_censored_counts": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "interpretation": "Ground truth is known by construction; projections and finite bars alone do not prove manifold type."
+  }
+}

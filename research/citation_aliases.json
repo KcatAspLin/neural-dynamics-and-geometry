@@ -1,0 +1,12 @@
+{
+  "app_desilva2011": "desilva2011",
+  "ev_chaudhuri2019": "app_chaudhuri2019",
+  "ev_gardner2022": "app_gardner2022",
+  "ev_sadtler2014": "app_sadtler2014",
+  "ev_churchland2012": "app_churchland2012",
+  "ev_gallego2020": "app_gallego2020",
+  "ev_sussillo2013": "app_sussillo2013",
+  "ev_hatcher2002": "hatcher2002",
+  "ev_oksendal2003": "oksendal2003",
+  "root_torch_lstm": "app_torchlstm"
+}

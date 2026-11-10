@@ -1,0 +1,121 @@
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\thispagestyle{empty}
+\vspace*{1.1cm}
+{\sffamily\color{teal}\large MATHEMATICS \quad NEUROSCIENCE \quad MACHINE LEARNING\par}
+\vspace{1.1cm}
+{\raggedright\sffamily\bfseries\color{navy}\fontsize{29}{35}\selectfont Mathematical Foundations\\of Neural Dynamics\\and Geometry\par}
+\vspace{0.9cm}
+{\raggedright\sffamily\color{navy}\Large From Dimensionality Reduction\\to Dynamical Systems, Manifolds, and Topology\par}
+\vspace{1.1cm}
+\noindent{\color{teal}\rule{\textwidth}{1.5pt}}
+\vspace{0.6cm}
+{\raggedright\large A textbook-style introduction to mathematical objects, computational tools, and the evidence needed to connect them.\par}
+\vfill
+\begin{tikzpicture}[scale=0.95,>=Stealth]
+\draw[navy,thick] (0,0) ellipse (1.6 and 0.65);
+\draw[teal,thick,->] (0,1.2) -- (0,0.75);
+\draw[teal,thick,->] (0,-1.2) -- (0,-0.75);
+\node[navy,align=center] at (0,-1.7) {geometry and attraction};
+\draw[navy,thick] (5.2,0) circle (0.8);
+\foreach \a in {0,45,...,315}{\fill[teal] ({5.2+0.8*cos(\a)},{0.8*sin(\a)}) circle (0.045);}
+\node[navy,align=center] at (5.2,-1.7) {samples and topology};
+\draw[navy,thick,->] (8.7,-0.9)--(11.4,-0.9);
+\draw[navy,thick,->] (8.7,-0.9)--(8.7,0.9);
+\draw[teal,very thick,domain=0:2.35,samples=60] plot ({8.8+\x},{0.65*exp(-1.7*\x)-0.55});
+\node[navy,align=center] at (10,-1.7) {dynamics and inference};
+\end{tikzpicture}
+\vfill
+{\sffamily\large Foundations edition\par}
+{\sffamily 10 November 2026\par}
+\vspace{0.25cm}
+{\small Prepared with ChatGPT for an interdisciplinary research audience.\par}
+\end{titlepage}
+\hypersetup{pageanchor=true}
+
+\chapter*{Preface and scope}
+\addcontentsline{toc}{chapter}{Preface and scope}
+A scatter plot can look like a ring. A population can be well approximated by two principal components. A recurrent network can return toward a set of states after a perturbation. These are different observations, with different mathematical meanings. The purpose of this book is to make those differences usable: to help a reader derive an analysis, understand its assumptions, and state a conclusion at the strength supported by the data.
+
+We begin with a matrix whose rows are observations and whose columns are measured variables. This familiar object leads to projections and dimensionality reduction. We then introduce state evolution, local stability, charts and tangent spaces, and finally algebraic tools for detecting holes. The application chapters revisit these ideas in neural recordings and artificial networks. The final part makes the inference problem explicit: what distinguishes a mathematical object in a model from evidence for that object in a biological system?
+
+\section*{What this edition contains}
+This is a self-contained introductory course and research reference, with thirteen chapters, five mathematical appendices, and nine executable computational tutorials. Central arguments are developed in detail: the PCA optimization problem; local linear stability and its limits; the local meaning of a manifold; chains, boundaries and homology; the distinction between an observation map and a dynamical state; and the design of controls for geometric and dynamical claims. Definitions, modeling assumptions, exact deductions, numerical results, and empirical findings are labeled separately.
+
+The depth is intentionally unequal. Stochastic calculus, general center-manifold and geometric singular-perturbation theory, persistent cohomology coordinate construction, and Koopman spectral theory receive clearly marked introductions. Their general proofs, a full treatment of torsion and integral homology, rigorous finite-sample guarantees for every manifold-learning algorithm, and an exhaustive literature survey are beyond this edition. These extensions are not prerequisites for using the core chapters. References identify where a reader can pursue them. An advanced subsection is a completed introduction to its stated topic, not a claim to replace its specialist textbook.
+
+All computational results in this edition are generated from synthetic data or a small network trained by the included code. They are educational experiments, not reanalyses of the cited biological datasets. The source project includes the scripts, data-generating equations, seeds, numerical summaries, package versions, and figures. The examples make failure modes visible as well as successful recovery. No Python tutorial infers a biological circuit from simulated evidence.
+
+\section*{How definitions, proofs, and examples are used}
+A definition fixes a convention; it is not an empirical claim. A theorem states a conclusion conditional on its hypotheses. A worked example shows the calculation in a system simple enough to check. An empirical study can provide support for a model without establishing every hypothesis of a theorem. Each use has value, but substituting one for another obscures the scientific question.
+
+The first occurrence of an unfamiliar concept includes its intuitive purpose and formal meaning. Appendices give short prerequisite refreshers, while the glossary points back to the full development. Readers should not feel obliged to memorize every term before proceeding. A useful learning cycle is to read a definition, work one example, run the associated tutorial, and return to the definition with a concrete object in mind.
+
+Proof sketches are labeled as such. They explain the main logical steps while indicating what has been omitted. Numerical checks validate an implementation against a specified example; they are not proofs of a theorem. When a fixed-point search finds several roots, for instance, its residual check can establish that each candidate is approximately a root, but cannot establish that all roots have been found.
+
+\begin{insight}{The question to keep asking}
+What is the proposed mathematical object? What is actually observed? Which analysis connects them? What alternative could produce the same result? What additional measurement or intervention would distinguish it?
+\end{insight}
+
+\chapter*{Curriculum, notation, and reading routes}
+\addcontentsline{toc}{chapter}{Curriculum, notation, and reading routes}
+\section*{A dependency-aware curriculum}
+The chapters follow a logical dependency order rather than a ranking of fashionable techniques. It is possible to use PCA without understanding homology; it is not possible to interpret a persistent homology class carefully without knowing what a cycle, a boundary, and a filtration are. Chapters 3 and 4 therefore supply the topology needed by the later applications, while Chapter 5 explains why geometric recovery and dynamical recovery are separate problems.
+
+\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.06\textwidth}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.41\textwidth}}
+\toprule
+Ch. & Topic & Main prerequisites & Capability developed \\
+\midrule\endhead
+1 & Data and dimensionality & Elementary algebra; App.~A & Derive PCA and compare linear, intrinsic, and effective dimensions. \\
+2 & Dynamical systems & Calculus; App.~B & Define a state, locate equilibria, and assess local stability. \\
+3 & Manifolds and geometry & Ch.~1; basic sets & Separate local coordinates, embedding, metric, and topology. \\
+4 & Topology and persistence & Ch.~3 topology; App.~D & Compute simple homology and interpret persistence with explicit coefficients and scale. \\
+5 & Dynamics on geometric sets & Chs.~2--4 & Distinguish invariant, stable, center, and slow manifolds and observation geometry. \\
+6 & Population analysis & Chs.~1--2; App.~C & Understand latent statistical models, preprocessing, and validation. \\
+7 & Neural attractor models & Chs.~2, 5 & Relate recurrent mechanisms to contraction, memory, and perturbations. \\
+8 & Neural representation geometry & Chs.~1, 3, 5 & Evaluate manifold and alignment claims under an observation model. \\
+9 & Neural topological analysis & Chs.~4, 6, 8 & Specify an end-to-end pipeline, statistic, and relevant null. \\
+10 & Artificial neural networks & Chs.~2, 5--8 & Analyze complete hidden states and separate inference from learning. \\
+11 & Computational tutorials & Topic-specific chapters & Reproduce known-ground-truth examples and test competing explanations. \\
+12 & Evaluating mathematical claims & Chs.~1--10 & Match the strength of a conclusion to its evidence. \\
+13 & Literature case studies & Ch.~12 framework & Read influential papers without weakening or inflating their claims. \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\section*{Three reading routes}
+\textbf{The foundations route} follows Chapters 1--5, consulting the appendices as needed, and then uses the relevant application chapters. This is the most systematic route for a reader new to differential equations and topology.
+
+\textbf{The experimental data route} begins with Chapters 1 and 6, then reads Chapters 3--4 before Chapters 8--9. Chapter 12 should accompany every analysis decision. Chapter 2 and the perturbation examples in Chapter 7 prevent a descriptive population embedding from being mistaken for an attractor model.
+
+\textbf{The recurrent-network route} reads Chapters 1--2, 5, 7, and 10, with Tutorials 3--5, 8, and 9. Chapters 3--4 become essential when the question concerns the topology of a family of hidden states, rather than the stability of a particular computation. This route is also useful when studying changes in representations across training checkpoints.
+
+\section*{Notation used throughout}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.71\textwidth}}
+\toprule Symbol & Meaning \\
+\midrule\endhead
+$X\in\R^{n\times p}$ & Data matrix: $n$ observations in rows, $p$ features or neurons in columns. \\
+$X_c$, $C$ & Centered data and sample covariance $C=X_c^TX_c/(n-1)$. \\
+$d$, $k$, $p$ & Intrinsic dimension, retained linear dimension, and ambient dimension. Local contexts specify other uses explicitly. \\
+$\gamma_j$ & Covariance eigenvalues, sorted in decreasing order when discussing dimension. \\
+$x(t)$, $h_t$ & Continuous state and discrete hidden state. A full state must contain all variables needed for its evolution given inputs. \\
+$y$, $g$ & Observed activity and observation map, often $y=g(x)+\eta$. \\
+$u(t)$, $u_t$ & Externally specified input. A fixed input is written $u_0$. \\
+$f$, $F$ & Continuous vector field $\dot x=f(x,u)$ and discrete update $x_{t+1}=F(x_t,u_t)$. \\
+$J$, $\lambda$ & Jacobian of a vector field or update map, and its eigenvalues. \\
+$\theta$ & Parameters of a learned model; in an explicitly circular example, an angle. The local definition disambiguates the use. \\
+$\tau$ & Time constant; its units match the time variable in an ODE. \\
+$M$, $T_xM$ & Manifold and tangent space at $x$. \\
+$H_q(K;\F)$, $\beta_q$ & Homology of complex $K$ in degree $q$ over field $\F$, and its dimension. \\
+$\epsilon$, $r$ & Rips maximum edge length and \v{C}ech ball radius, respectively. A factor of two matters when comparing conventions. \\
+$\F_2$, $\F_\ell$ & Finite fields of two elements or prime order $\ell$. Persistent homology tutorials use $\F_2$. \\
+$\rho(J)$ & Spectral radius: maximum absolute eigenvalue of a square matrix. \\
+$\norm{\cdot}$, $\ip{\cdot}{\cdot}$ & Euclidean norm and inner product unless another metric is specified. \\
+\bottomrule
+\end{longtable}
+
+\section*{A note on axes, units, and coordinates}
+A coordinate is not a mechanism. PCA axes may change sign without changing the fitted subspace. Latent coordinates may rotate while a model's predictions stay the same. A change from milliseconds to seconds rescales the numerical entries of a continuous-time Jacobian, but it does not change the sign of their real parts. A discrete-time multiplier, in contrast, is dimensionless and must be compared with the unit circle. Throughout the book, such invariances are used as sanity checks.
+
+An equation is interpreted in its declared coordinate system and observation model. Standardizing each neuron changes Euclidean distances; nonlinear embedding changes geometry; averaging trials changes the distribution being analyzed. There is no universally neutral preprocessing. The useful question is which scientific variation the chosen operation retains and which it removes.

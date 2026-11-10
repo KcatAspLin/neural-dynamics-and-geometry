@@ -1,0 +1,221 @@
+\chapter{What Mathematical Claims Can Neural Data Support?}\label{ch:12}
+
+\section*{Learning objectives}
+By the end of this chapter, the reader should be able to separate a mathematical object from its estimator, formulate an empirical claim with an explicit scope, identify observationally indistinguishable mechanisms, and design controls that address a particular alternative explanation. The aim is neither to prohibit useful approximations nor to demand an impossible proof from an experiment. It is to make the chain from observation to interpretation inspectable.
+
+\section{One picture, several scientific claims}
+Imagine that a two-dimensional display of population activity shows a ring. There are at least five different possible statements:
+\begin{enumerate}
+\item This particular embedding contains a visible hole.
+\item The chosen metric on the measured activity has a persistent one-dimensional homology class.
+\item The observations are noisy samples near a smooth one-dimensional closed manifold.
+\item The relevant neural state evolves near an invariant, attracting circle.
+\item Recurrent connections within the recorded circuit generate and maintain that circle.
+\end{enumerate}
+Each statement concerns a different object. An embedding is the output of an algorithm; persistent homology describes a filtration built from distances; a manifold is a local geometric structure; attraction is a property of a time-evolution rule; a circuit mechanism concerns causal interactions. None of these distinctions diminishes the value of a ring visualization. They identify the additional work required to move from one claim to the next.
+
+Throughout, let the underlying state be \(x_t\), the measured response be
+\begin{equation}\label{eq:12-observation}
+y_t=g(x_t)+\varepsilon_t,
+\end{equation}
+and the processed response be \(\widetilde y_t=P(y_{1:T})_t\). Here \(g\) is the observation map, \(\varepsilon_t\) is measurement noise, and \(P\) includes binning, smoothing, normalization, neuron selection, and dimensionality reduction. A conclusion about \(\widetilde y\) is not automatically a conclusion about \(x\). In particular, smoothing may use neighboring times, and a projection may identify distinct states.
+
+\section{A six-part statement of a claim}\label{sec:12-framework}
+For any substantive claim, write the following six elements before selecting the analysis.
+\begin{description}
+\item[A. Mathematical definition.] Specify the object and the ambient setting. For example: a compact attracting invariant set of a specified autonomous flow, or a \(d\)-dimensional smooth embedded manifold.
+\item[B. Operational definition.] State the finite-data criterion. For example: the first \(k\) principal components explain a specified fraction of held-out variance, or an estimated transverse drift is negative over a prespecified range.
+\item[C. Empirical evidence.] Identify the observations and the statistic, including the population, behavioral regime, recording duration, preprocessing, and uncertainty.
+\item[D. Strength of inference.] State the narrowest claim that the evidence supports. An estimator can support a model assumption without verifying every hypothesis of a theorem.
+\item[E. Alternative explanations.] Give at least one explicit competing data-generating process, not merely the word \emph{noise}.
+\item[F. Stronger validation.] Specify a new observation, held-out prediction, or perturbation on which the competing explanations disagree.
+\end{description}
+This structure separates disagreements about definitions from disagreements about evidence. A linear factor model may legitimately call its fitted subspace an operational neural manifold. The scientific question is whether subsequent conclusions require only that subspace or silently require curvature, topology, or attraction.
+
+\begin{example}[A claim about dimensionality]
+Suppose a model with five latent variables predicts unobserved neurons better than models with two or ten variables. A defensible statement is that five dimensions give the best predictive trade-off among the tested models, for these neurons, trials, and recording conditions. This is not the assertion that the complete circuit has exactly five dynamical degrees of freedom. A different observation map, stimulus distribution, noise model, or time resolution could change the predictive optimum.
+\end{example}
+
+\section{Why finite samples do not certify a manifold}
+A finite point cloud, equipped with its subspace topology from Euclidean space, is discrete: each distinct point has a sufficiently small neighborhood containing no other sampled point. The cloud is therefore not literally the continuous circle or surface that an analysis seeks to infer. The scientific object is a hypothesized support, latent state space, or concentration set of a sampling distribution.
+
+\begin{proposition}[An exact fit does not identify dimension]\label{prop:12-interpolation}
+For any finite set of distinct points in \(\R^p\), with \(p\geq 2\), there is a smooth embedded one-dimensional manifold containing every point. The same point set is also contained in the \(p\)-dimensional manifold \(\R^p\).
+\end{proposition}
+\begin{proof}
+Choose a direction \(a\) such that \(a^\top(x_i-x_j)\ne0\) for every distinct pair. Such a direction exists because the finitely many forbidden hyperplanes cannot cover \(\R^p\). After an orthogonal change of coordinates, write the points as \((t_i,z_i)\), with all \(t_i\) distinct and \(z_i\in\R^{p-1}\). For each coordinate of \(z\), polynomial interpolation gives a polynomial \(q_j(t)\) with \(q_j(t_i)=(z_i)_j\). The graph
+\[
+\Gamma=\{(t,q_1(t),\ldots,q_{p-1}(t)):t\in\R\}
+\]
+contains the sample. Its parametrization is injective, its derivative has first component one, and projection onto the first coordinate is a continuous inverse. Hence it is a smooth embedding of \(\R\).
+\end{proof}
+The construction may bend wildly between observations. Its purpose is not to recommend interpolation; it proves why an assumption about regularity and sampling is unavoidable. Generalization to new observations, bounded curvature, noise estimates, and coverage of the proposed support constrain the many possible interpolating geometries.
+
+Manifold reconstruction theorems make such assumptions explicit. For example, the framework of \citet{ev_niyogi2008} controls geometric scale through a condition number related to curvature and near self-intersections and imposes sampling conditions. The existence of a recovery theorem is not evidence that its sampling and noise hypotheses hold in a particular recording.
+
+\begin{insight}{A useful operational formulation}
+Instead of saying that the data are a manifold, ask whether a specified distribution of observations concentrates near an approximately smooth \(d\)-dimensional set, at a stated spatial and temporal scale, with errors small enough for the scientific question. Then report the tests of that approximation.
+\end{insight}
+
+\section{A dictionary of definitions and measurements}
+Table~\ref{tab:12-dictionary} collects recurring distinctions. Definitions are abbreviated here; Chapters~\ref{ch:01}--\ref{ch:05} provide the mathematical qualifications.
+
+{\scriptsize
+\setlength{\tabcolsep}{2pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{.10\linewidth}>{\raggedright\arraybackslash}p{.18\linewidth}>{\raggedright\arraybackslash}p{.16\linewidth}>{\raggedright\arraybackslash}p{.17\linewidth}>{\raggedright\arraybackslash}p{.18\linewidth}>{\raggedright\arraybackslash}p{.13\linewidth}}
+\caption{From formal terms to empirical measurements. A supported inference is conditional on the listed operational choice.}\label{tab:12-dictionary}\\
+\toprule
+Term & Formal definition & Common neuroscience usage & Typical measurement & What can be inferred & Common overinterpretation\\
+\midrule
+\endfirsthead
+\toprule
+Term & Formal definition & Common neuroscience usage & Typical measurement & What can be inferred & Common overinterpretation\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Linear dimension & Dimension of a vector subspace; rank of a matrix & Number of components explaining substantial response variance & Singular values; held-out reconstruction & Compressibility under the selected norm and distribution & Total circuit dimension is fixed by a PCA threshold\\
+Intrinsic dimension & Local coordinate dimension of a manifold & Number of latent degrees of freedom at a chosen scale & Local PCA; neighbor-distance estimators; model comparison & Evidence for a local low-dimensional approximation & A precise, scale-independent biological integer\\
+Effective dimension & A statistic of a spectrum, such as participation ratio & Breadth of population covariance & \((\sum_j\gamma_j)^2/\sum_j\gamma_j^2\) & Variance spread across orthogonal modes & Topological or manifold dimension\\
+Manifold & Hausdorff, second-countable, locally Euclidean space; smooth compatibility when claimed & Restricted repertoire or fitted latent surface & Reconstruction, local dimension, out-of-sample prediction & Adequacy of a geometric model in sampled regions & Smoothness and global topology follow from a plot\\
+Intrinsic geometry & Distances or metric tensor defined on the space itself & Neighborhood or geodesic relations of neural states & Graph distances; local metric estimates & Structure under the chosen metric and sampling scheme & Any nonlinear embedding preserves neural distances\\
+Topology & Properties invariant under homeomorphism & Connected components and holes across scales & Persistent homology/cohomology & Homological features of the chosen filtration & Betti numbers uniquely identify the space\\
+Attractor & Compact invariant, stable, locally attracting set under the convention used here & Frequently occupied or apparently recurrent activity state & Return trajectories; drift; perturbations; model basins & Evidence for attraction in the observed regime & High occupancy alone establishes attraction\\
+Stability & Response to sufficiently small state perturbations over time & Reproducible signals or similar activity across days & Jacobian spectra; perturbation response; cross-session alignment & The particular kind of robustness that was measured & Reproducibility is Lyapunov stability\\
+Repre\-sen\-ta\-tion & A specified map between variables and neural states or readouts & Information about a task variable in activity & Encoding, decoding, invariance, interventions & Predictive association, and causal use if separately tested & Decodability proves the circuit uses that variable\\
+Latent dynamics & A transition rule on a latent state space & A fitted evolution model for observations & Forecasting; likelihood; residuals; interventions & A predictive dynamical description within tested conditions & The fitted coordinates are unique biological variables\\
+\end{longtable}
+}
+
+\section{Geometry is not an autonomous mechanism}
+\subsection{Identical trajectories with different attraction}
+Consider the unit-circle trajectory
+\[
+y(t)=(\cos\omega t,\sin\omega t),\qquad \omega>0.
+\]
+It solves the linear system \(\dot y=\omega Jy\), where
+\[
+J=\begin{pmatrix}0&-1\\1&0\end{pmatrix}.
+\]
+Every circle is invariant, but the unit circle does not attract nearby radii: \(\frac{\dd}{\dd t}\norm{y}^2=0\). It also solves
+\begin{equation}\label{eq:12-attracting-circle}
+\dot y=(1-\norm{y}^2)y+\omega Jy.
+\end{equation}
+For this second system, \(r=\norm y\) obeys \(\dot r=r(1-r^2)\); the derivative of the radial drift at \(r=1\) is \(-2\). Small radial deviations decay. A third system can simply be an externally prescribed periodic input that drives two otherwise passive channels. On the displayed trajectory, all three agree.
+
+Off-trajectory observations distinguish these explanations. A radial displacement produces neutral persistence in the first model, relaxation in the second, and an input-dependent response in the third. Consequently, longer observation of one unperturbed orbit need not resolve a mechanistic ambiguity. An intervention directed into a previously unvisited state-space direction may be much more informative.
+
+\subsection{Projection can destroy closure}
+Suppose
+\[
+\dot x_1=x_2,\qquad \dot x_2=-x_1,
+\]
+but only \(y=x_1\) is recorded. At \(y=0\), the derivative can be positive or negative, depending on unobserved \(x_2\). There is no single-valued autonomous rule \(\dot y=F(y)\) valid for all states. A fitted conditional mean drift may still exist, but it averages over hidden states rather than recovering a closed deterministic law.
+
+A practical closure check asks whether histories, external inputs, or additional recorded variables improve prediction after conditioning on the proposed latent state. Failure to detect improvement is not proof of closure: the added measurements may be too noisy. Detectable improvement is direct evidence that the reduced state is insufficient for the proposed autonomous model.
+
+\section{Attraction, noise, and apparent return}
+\subsection{Occupancy does not determine drift}
+A density describes where observations occur; dynamics also describes their directed transitions. For a diffusion
+\[
+\dd x_t=b(x_t)\,\dd t+\sqrt{2D}\,\dd W_t,
+\]
+the stationary density \(\rho\), when sufficiently regular, satisfies
+\[
+0=-\nabla\cdot(b\rho)+D\Delta\rho.
+\]
+Knowing \(\rho\) alone does not determine \(b\). Different probability currents \(b\rho-D\nabla\rho\) may have zero divergence and share the same density. An energy defined as \(-\log\rho\) is therefore not generally a physical potential whose negative gradient generates the drift. Such an identification requires additional assumptions, including the appropriate diffusion model and equilibrium or detailed-balance structure.
+
+This is especially clear on a circle. Uniform occupancy is compatible with no deterministic angular drift, constant clockwise drift, or a sufficiently symmetric stochastic process. Conversely, nonuniform occupancy can arise from nonuniform behavioral sampling even if an internal angular coordinate has no preferred state.
+
+\subsection{A worked measurement-noise counterexample}
+Let a genuinely constant hidden state be observed as \(y_t=\mu+\varepsilon_t\), with independent, zero-mean measurement errors. Then
+\begin{align}
+\E[y_{t+1}-y_t\mid y_t]
+&=\E[\mu+\varepsilon_{t+1}-y_t\mid y_t]\\
+&=\mu-y_t.
+\end{align}
+A regression of measured displacement on measured displacement from the mean finds inward drift, although no hidden-state displacement occurred at all. The same observation error contributes positively to the regressor and negatively to the increment. This is a precise form of regression to the mean.
+
+Temporal correlation changes the artifact without removing the issue. If the errors follow a stationary Gaussian autoregression with conditional mean \(\E[\varepsilon_{t+1}\mid\varepsilon_t]=\rho\varepsilon_t\), then the apparent slope is \(\rho-1\). Binning and filtering change this correlation. Therefore, apparent return should be compared with an observation-noise model that undergoes the same preprocessing.
+
+\begin{insight}{Stronger evidence for attraction}
+Estimate a candidate set from independent data; characterize noise; test return after a displacement whose size exceeds measurement uncertainty; examine several transverse directions; report return times and failures; and compare models with input-driven correction. When only passive recordings are available, state that transverse drift is observational evidence compatible with attraction rather than a complete causal identification of recurrence.
+\end{insight}
+
+\section{What a topological result does and does not identify}
+A long-lived \(H_1\) class is evidence for a robust loop in a filtration, relative to its metric and scale. It does not distinguish a circle from an annulus, which has the same homotopy type, nor establish one-dimensional local neighborhoods. Betti numbers \((1,2,1)\) are compatible with a torus but also with the wedge \(S^1\vee S^1\vee S^2\), which is not a surface at the common attachment point. Over \(\F_2\), they also fail to distinguish a torus from a Klein bottle.
+
+Additional assumptions can change the inference. A connected, compact, orientable, boundaryless two-dimensional manifold with first Betti number two is a torus by the classification of surfaces. The force of the conclusion comes from the \emph{combination} of the theorem and those assumptions. A persistence diagram does not itself establish them.
+
+Persistent homology also leaves timing unspecified. Permuting the order of point-cloud samples preserves all pairwise distances and its ordinary persistence diagram. It can destroy every temporal trajectory while leaving the topological result unchanged. Thus a topological analysis can complement, but cannot substitute for, dynamical analysis.
+
+\section{Null models should encode a scientific alternative}\label{sec:12-nulls}
+The null hypothesis is not that nothing interesting happened. It is a family of processes that can account for specified properties without the additional mechanism being claimed. \citet{ev_elsayed2017} developed neural population controls that preserve selected simpler features while testing additional population structure. The general principle is to preserve what the alternative already explains.
+
+Consider a loop statistic \(T\), such as the longest finite \(H_1\) lifetime. Different surrogates ask different questions:
+\begin{itemize}
+\item Independent time shuffles per neuron test whether temporal coordination matters, but also destroy autocorrelation and behavioral tuning relationships.
+\item Independent circular shifts preserve each neuron's sequence up to a time origin; they usually disrupt simultaneous coordination. Their validity depends on stationarity and on whether wraparound is scientifically plausible.
+\item Trial-label shuffles within a matched condition preserve condition means but alter trial-specific population dependence, provided trials are exchangeable within that condition.
+\item A fitted behavior-driven encoding model asks whether tuning and the observed behavioral trajectory suffice to produce the statistic.
+\item A fitted latent stochastic process asks whether covariance, smoothness, and sampling alone suffice.
+\end{itemize}
+Rejecting one null does not reject all alternatives. An independent-neuron null is an especially weak test of a recurrent attractor claim when coordinated external input is plausible.
+
+For exchangeable observed and surrogate statistics \(T_{\mathrm{obs}},T_1,\ldots,T_B\), a Monte Carlo upper-tail value is
+\begin{equation}\label{eq:12-montecarlo}
+p=\frac{1+\sum_{b=1}^B\mathbf1\{T_b\geq T_{\mathrm{obs}}\}}{B+1}.
+\end{equation}
+The added one prevents an impossible report of zero and accounts for the observed dataset in the rank \citep{ev_phipson2010}. Exchangeability is the substantive requirement. Surrogates from a model fitted to the same data generally require a parametric-bootstrap interpretation, refitting, or calibration; the rank formula alone does not make them an exact test.
+
+If preprocessing parameters were chosen to maximize \(T_{\mathrm{obs}}\), the identical search should be repeated inside each surrogate, or the final configuration should be evaluated on independent data. Otherwise the null distribution does not include the researcher's selection procedure. Reporting the entire sensitivity analysis is often more informative than reporting the most favorable parameter setting.
+
+\section{Prediction, invariance, and intervention}
+\subsection{Prediction has levels}
+Reconstructing the points used to fit a model is the weakest prediction. Predicting withheld time bins from immediately adjacent smoothed bins may also be easy. More demanding tasks include predicting independent trials, unobserved neurons, new initial states, changed inputs, and responses to perturbations. These tests ask different questions; none is a universal ranking that ignores the scientific goal.
+
+For temporal models, train-test splits should preserve the relevant unit of independence. If smoothing reaches across the split, a held-out value partly enters its own predictor. If several sessions share the same animal, uncertainty over time bins is not uncertainty over animals. Report both the statistical unit and the intended generalization population.
+
+\subsection{Latent coordinates have a gauge freedom}
+Suppose a state-space model uses \(z_{t+1}=F(z_t)\), \(y_t=g(z_t)\), and \(h\) is an invertible change of latent coordinates. Defining
+\[
+\widetilde z=h(z),\quad
+\widetilde F=h\circ F\circ h^{-1},\quad
+\widetilde g=g\circ h^{-1}
+\]
+gives exactly the same observations. Latent coordinate axes are therefore not usually identifiable without constraints. Under a smooth invertible change of coordinates, qualitative features such as fixed-point stability are preserved, but Euclidean lengths and angles generally are not. An interpretation of one latent axis as a biological variable requires a justified alignment or independent measurement.
+
+\subsection{Interventions are informative only with a prediction}
+An intervention that changes behavior establishes that something affected behavior. A mechanistic test specifies the predicted direction, timing, and dependence on initial state. For an attracting manifold, compare perturbations approximately tangent and transverse to it. For an RNN mechanism, perturb an identified slow mode, a matched random mode, and an output-potent mode, controlling perturbation magnitude and operating point. For a biological circuit, imperfect selectivity and changes to the observation map must enter the interpretation.
+
+No finite intervention set proves that a model is uniquely correct. It can eliminate concrete alternatives and establish a useful causal account over a stated range. That is a stronger and more reproducible achievement than an unqualified declaration that a visualization has revealed the mechanism.
+
+\section{A worked claim audit}
+Suppose a recording yields one persistent loop, an angular coordinate correlated with heading, and inward mean increments near the fitted ring.
+\begin{enumerate}
+\item \textbf{Definition:} the proposed mechanism is a continuous attracting set with one neutral angular direction and contracting transverse directions.
+\item \textbf{Operation:} detect a loop in an independently specified metric, fit an angular coordinate, and estimate transverse conditional increments.
+\item \textbf{Evidence:} report held-out angular decoding, uncertainty in persistence, dependence on bin width, and drift after accounting for measurement noise.
+\item \textbf{Inference:} the population supports a circular representational coordinate and dynamics compatible with transverse attraction in the sampled regime.
+\item \textbf{Alternatives:} a behavior-driven tuning map with correlated input, observation-noise return, or a larger unobserved network maintaining the state.
+\item \textbf{Validation:} examine spontaneous states without the same behavioral drive, perturb the activity transversely, and test predictions that separate local recurrence from input-driven restoration.
+\end{enumerate}
+The last two lines should not be read as erasing the evidence in the first four. They define the remaining scientific problem.
+
+\section*{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} A dataset has covariance eigenvalues \(9,1,0,\ldots,0\). Compute the rank of its centered data matrix, participation ratio, and the smallest number of PCs explaining \(90\%\) of its variance. Which quantities are necessarily equal?
+\item \textbf{Introductory.} Explain why permuting the time order leaves a point-cloud persistence diagram unchanged but may alter a fitted transition matrix.
+\item \textbf{Intermediate.} For \(\dot r=-a(r-1)\), \(\dot\theta=\omega\), identify observations that determine \(a\), \(\omega\), both, or neither. What if every observation lies exactly at \(r=1\)?
+\item \textbf{Intermediate.} Derive the apparent regression slope for \(y_t=\mu+\varepsilon_t\) when \(\varepsilon_t\) is a stationary Gaussian AR(1) process. Propose a control using independently measured channels.
+\item \textbf{Intermediate.} Design two null models for a ring in head-direction data: one that removes all cross-neuron dependence and another that preserves heading tuning. State what each rejection means.
+\item \textbf{Advanced.} Use Proposition~\ref{prop:12-interpolation} to explain why training reconstruction error alone cannot consistently select manifold dimension without regularization or held-out data.
+\item \textbf{Advanced.} Construct two non-homeomorphic spaces with identical Betti numbers over \(\F_2\). Identify an extra assumption or invariant that distinguishes them.
+\end{enumerate}
+
+\section*{Chapter summary}
+An empirical mathematical claim has three distinct components: the formal object, the finite-data procedure, and the scientific interpretation. Sampling and observation assumptions connect them. Geometry alone does not determine dynamics; dynamics in observations does not uniquely identify a circuit mechanism. Good evidence is explicit about what is preserved by a null model, what is predicted out of sample, and which alternative explanation an intervention can distinguish.
+
+\section*{Further reading}
+\citet{ev_elsayed2017} is a practical starting point for population null models. \citet{ev_niyogi2008} shows how geometric recovery requires quantified assumptions. The studies in Chapter~\ref{ch:13} illustrate how these distinctions can be used constructively when reading influential neuroscience papers.

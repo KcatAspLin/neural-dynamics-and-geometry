@@ -1,0 +1,33 @@
+{
+  "tutorial": "05_ring_attractor",
+  "seed": 17,
+  "versions": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "matplotlib": "3.10.8",
+    "torch": "2.15.0+cpu",
+    "ripser": "0.6.15",
+    "persim": "0.4.1",
+    "umap-learn": "0.6.0",
+    "numba": "0.68.1"
+  },
+  "metrics": {
+    "n": 96,
+    "tau_seconds": 0.1,
+    "dt_seconds": 0.002,
+    "baseline_fixed_point_residual": 1.679217315652265e-14,
+    "largest_jacobian_eigenvalues": [
+      3.7650438322600634e-14,
+      -4.843737725588108,
+      -9.999999999999986,
+      -9.999999999999988,
+      -9.99999999999999
+    ],
+    "baseline_bump_magnitude": 0.22441933788991314,
+    "final_radial_magnitude_error": 0.0,
+    "final_phase_shift_radians": 0.7853981633974483,
+    "caveat": "Finite neuron grid has discrete rotation symmetry; near-neutral is not a proof of exact continuous symmetry."
+  }
+}

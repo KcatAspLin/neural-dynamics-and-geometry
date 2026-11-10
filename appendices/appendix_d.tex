@@ -1,0 +1,158 @@
+\chapter{Additional Mathematical Background}\label{app:d}
+
+\section*{Purpose and learning objectives}
+This appendix supplies compact bridges beyond first-year mathematics. It introduces the set language used in topology, the algebra used in homology, linear operators acting on functions, and the stochastic-calculus convention used for noisy dynamics. Detailed geometric and topological developments remain in Chapters~\ref{ch:03}--\ref{ch:05}; this appendix is a reference, not an alternative route that assumes those topics are already familiar.
+
+\section{Sets, functions, and equivalence relations}
+A set is a collection of elements. The notation \(x\in A\) means membership, \(A\subseteq B\) means every element of \(A\) belongs to \(B\), \(A\cap B\) is the intersection, and \(A\cup B\) is the union. The Cartesian product \(A\times B\) consists of ordered pairs \((a,b)\).
+
+A function \(f:A\to B\) assigns exactly one value in \(B\) to each element of its domain \(A\). It is injective if equal outputs imply equal inputs, surjective if every element of \(B\) is an output, and bijective if both conditions hold. An inverse function \(f^{-1}:B\to A\) exists for a bijection. The preimage of a set,
+\[
+f^{-1}(U)=\{x\in A:f(x)\in U\},
+\]
+is defined even when \(f\) is not invertible. The same notation therefore has two related but different uses.
+
+An equivalence relation \(\sim\) is reflexive, symmetric, and transitive. The equivalence class of \(x\) is \([x]=\{y:y\sim x\}\); the quotient set \(A/{\sim}\) consists of these classes. Angles give a useful example:
+\[
+\theta\sim\phi\quad\Longleftrightarrow\quad
+\theta-\phi=2\pi k\text{ for some }k\in\Z.
+\]
+Thus \(\R/(2\pi\Z)\) identifies angles differing by complete turns. A quotient identifies objects according to a specified relation; it is not ordinary numerical division.
+
+\section{Metrics and topologies}
+A metric \(d\) obeys nonnegativity, \(d(x,y)=0\) exactly when \(x=y\), symmetry, and the triangle inequality. An open ball is \(B_r(x)=\{y:d(x,y)<r\}\). A set is open in the metric topology if every point has an open ball contained in that set.
+
+More generally, a topology on a set \(M\) is a collection of open subsets containing \(\varnothing\) and \(M\), closed under arbitrary unions and finite intersections. Continuity means that preimages of open sets are open. A homeomorphism is a continuous bijection with continuous inverse. A bijection alone preserves only distinctness, not neighborhood structure.
+
+For a subset \(A\subseteq M\), its subspace topology consists of intersections \(A\cap U\) with \(U\) open in \(M\). Thus the interval \([0,1)\) is open as a subset of \([0,2]\) with its subspace topology, although it is not open in \(\R\).
+
+A space is Hausdorff if distinct points have disjoint open neighborhoods. It is second-countable if there is a countable collection of open sets such that every open set is a union of members of that collection. These technical conditions in the definition of a manifold exclude pathological spaces and ensure manageable global structure. They are satisfied by Euclidean spaces and their ordinary embedded submanifolds.
+
+Compactness means that every open cover admits a finite subcover. In \(\R^p\), compact sets are exactly the closed bounded sets. A continuous function on a compact set attains a maximum and minimum. A connected space cannot be split into two nonempty disjoint relatively open sets; path-connectedness additionally requires continuous paths between points. Path-connectedness implies connectedness, while the converse requires extra assumptions.
+
+\section{Groups and finite fields}
+A group \(G\) has an operation satisfying closure, associativity, an identity, and an inverse for every element. It is abelian if the operation commutes. Integers under addition and planar rotations about a fixed origin each form an abelian group. Three-dimensional rotations generally do not commute. A homomorphism preserves the operation. Its kernel contains elements mapped to the identity, and its image contains all outputs.
+
+A field permits addition, subtraction, multiplication, and division by nonzero elements. The simplest finite field is
+\[
+\F_2=\{0,1\},\qquad 1+1=0.
+\]
+Over \(\F_2\), a vector is a list of zeros and ones, addition is coordinatewise modulo two, and linear algebra still has bases, rank, and null spaces. For a prime \(q\), arithmetic modulo \(q\) gives \(\F_q\). Arithmetic modulo a composite integer is not generally a field: modulo six, \(2\cdot3=0\) although neither factor is zero.
+
+In simplicial homology over \(\F_2\), a chain is a collection of simplices with binary coefficients; adding the same simplex twice cancels it. This removes orientation signs and makes the boundary of an edge its two endpoints. Different coefficient fields can reveal different distinctions; no field is universally more informative. Fields of characteristic other than two retain orientation signs. Chapter~\ref{ch:04} develops the boundary operators rather than assuming the algebra.
+
+\section{Quotient vector spaces and homology}
+If \(W\) is a subspace of \(V\), define \(v\sim v'\) when \(v-v'\in W\). Then
+\[
+V/W=\{v+W:v\in V\}
+\]
+is a vector space of equivalence classes. Two representatives describe the same quotient element when they differ by a vector declared irrelevant.
+
+\begin{example}
+Let \(V=\R^2\) and \(W=\{(a,0):a\in\R\}\). Each equivalence class is a horizontal line. The quotient records only the vertical coordinate and is isomorphic to \(\R\). Quotienting is therefore different from selecting a literal subset of the plane, although a vertical line can provide one convenient choice of representatives.
+\end{example}
+
+In a chain complex, consecutive boundary maps satisfy \(\partial_k\partial_{k+1}=0\). Consequently,
+\[
+B_k=\operatorname{im}\partial_{k+1}
+\subseteq Z_k=\ker\partial_k,
+\qquad H_k=Z_k/B_k.
+\]
+The quotient says that cycles differing by a boundary represent the same homology class. For finite-dimensional chain spaces over a field,
+\[
+\dim H_k
+=\dim C_k-\rank\partial_k-\rank\partial_{k+1}.
+\]
+This formula follows from rank--nullity and \(\dim(Z_k/B_k)=\dim Z_k-\dim B_k\). It is the linear-algebraic core of a homology computation. \citet{hatcher2002} provides a systematic treatment beyond this introductory level.
+
+\section{Linear operators can act on functions}
+A linear operator is a linear map between vector spaces, which may be spaces of functions rather than finite coordinate vectors. Differentiation is linear: \(D(af+bg)=aDf+bDg\). Composition with a fixed map \(F\) defines
+\[
+(\mathcal K\phi)(x)=\phi(F(x)).
+\]
+The operator \(\mathcal K\) is linear in the observable \(\phi\), even if \(F\) is nonlinear in \(x\). This is the basic Koopman construction used in Chapter~\ref{ch:05}.
+
+Linearity of the operator does not imply finite dimension. A selected dictionary \(\phi_1,\ldots,\phi_k\) may fail to be closed under \(\mathcal K\). For example, if \(F(x)=x^2\) and \(\phi(x)=x\), then \(\mathcal K\phi=x^2\); applying it again gives \(x^4\). A one-function dictionary cannot describe the iterates exactly. Data-driven matrix approximations therefore require a closure or projection assumption.
+
+\section{Geometry in coordinates}
+A chart \(\varphi:U\to\R^d\) supplies local coordinates on a manifold. A tangent vector can be defined as the velocity of a curve through a point; two curves give the same tangent vector when their coordinate velocities agree. Under a smooth coordinate change \(\widetilde z=h(z)\),
+\[
+\widetilde v=Dh(z)v.
+\]
+Thus a tangent vector is geometric even though its component list depends on coordinates.
+
+A Riemannian metric assigns a positive definite inner product \(G(z)\) to tangent vectors smoothly across the manifold. The squared length of \(v\) is \(v^\top G(z)v\). Under a coordinate change, \(G\) must transform so that this length stays the same. For an embedding \(g:\R^d\to\R^p\), the metric induced by Euclidean ambient distance is
+\[
+G(z)=Dg(z)^\top Dg(z),
+\]
+provided the derivative has rank \(d\). This formula gives a local metric; straight-line ambient distance between distant points need not equal geodesic distance along the manifold.
+
+\section{Brownian motion and the It\^o convention}
+A standard one-dimensional Brownian motion \(W_t\) starts at zero, has continuous paths, and has independent Gaussian increments
+\[
+W_t-W_s\sim\mathcal N(0,t-s),\qquad t>s.
+\]
+The typical increment is of order \(\sqrt{\Delta t}\), so Brownian paths do not have ordinary time derivatives. The notation \(\dd W_t\) represents an increment in a stochastic integral, not a conventional infinitesimal velocity.
+
+An It\^o equation
+\[
+\dd X_t=b(X_t)\,\dd t+\sigma(X_t)\,\dd W_t
+\]
+means
+\[
+X_t=X_0+\int_0^t b(X_s)\,\dd s
++\int_0^t\sigma(X_s)\,\dd W_s,
+\]
+where the second integral uses adapted left-endpoint approximations and a suitable probabilistic limit. Global Lipschitz coefficients with linear-growth control provide standard sufficient conditions for a unique global strong solution. This appendix gives the operational facts required here; a measure-theoretic construction is an advanced extension, for which \citet{oksendal2003} is a reference.
+
+\begin{theorem}[One-dimensional It\^o formula]
+If \(X_t\) solves the It\^o equation above and \(f\) is twice continuously differentiable, then, up to any necessary localization,
+\[
+\dd f(X_t)
+=\left[f'(X_t)b(X_t)
++\frac12f''(X_t)\sigma(X_t)^2\right]\dd t
++f'(X_t)\sigma(X_t)\,\dd W_t.
+\]
+\end{theorem}
+The extra second-derivative term is the main difference from the ordinary chain rule. A Taylor expansion contains \(\frac12f''(\Delta X)^2\); Brownian squared increments accumulate at order \(\Delta t\), rather than disappearing as in smooth deterministic calculus.
+
+\begin{example}[Why the extra term is necessary]
+Take \(X_t=W_t\) and \(f(x)=x^2\). It\^o's formula gives
+\[
+\dd(W_t^2)=2W_t\,\dd W_t+\dd t.
+\]
+Taking expectations yields \(\E W_t^2=t\), as required by the Gaussian increment definition. The ordinary chain rule would omit the term that creates this variance.
+\end{example}
+
+\section{Noisy stability: the Ornstein--Uhlenbeck example}
+For
+\[
+\dd X_t=-aX_t\,\dd t+\sigma\,\dd W_t,\qquad a>0,\quad\sigma>0,
+\]
+the solution from a fixed initial value is
+\[
+X_t=e^{-at}X_0+\sigma\int_0^t e^{-a(t-s)}\,\dd W_s.
+\]
+Its mean is \(e^{-at}X_0\). Using the It\^o isometry gives
+\[
+\Var(X_t)
+=\sigma^2\int_0^t e^{-2a(t-s)}\,\dd s
+=\frac{\sigma^2}{2a}(1-e^{-2at}).
+\]
+The distribution approaches \(\mathcal N(0,\sigma^2/(2a))\), rather than every sample path converging to zero. The deterministic fixed point remains a useful reference, but noisy stability concerns concentration, stationary distributions, and escape times as well as mean drift.
+
+For multiplicative noise, It\^o and Stratonovich notation encode different equations unless the drift is converted. In one dimension,
+\[
+\dd X=b_{\mathrm S}(X)\,\dd t+\sigma(X)\circ\dd W
+\]
+has It\^o drift \(b_{\mathrm I}=b_{\mathrm S}+\frac12\sigma\sigma'\). With constant \(\sigma\), the correction vanishes. Always state the convention before interpreting an energy or stationary density.
+
+\section*{Exercises and quick checks}
+\begin{enumerate}
+\item \textbf{Introductory.} Explain why angles modulo \(2\pi\) form a quotient and why a real-valued angle coordinate must have a cut.
+\item \textbf{Intermediate.} Compute \(\dim H_1\) for a triangle graph with three vertices and three edges, then after adding its filled two-simplex.
+\item \textbf{Intermediate.} For \(g(\theta)=(R\cos\theta,R\sin\theta)\), compute the induced metric and the length of one complete circuit.
+\item \textbf{Advanced.} Apply It\^o's formula to \(X_t^2\) for the Ornstein--Uhlenbeck process and derive the differential equation for its second moment.
+\end{enumerate}
+\section*{Summary and further reading}
+The central habit is to identify which operations are being performed on points, equivalence classes, vectors, functions, or random processes. Many apparent mathematical paradoxes disappear once those object types are kept distinct. A common misconception is that linearity of an operator implies a low-dimensional state space; the Koopman example shows why an infinite dictionary may be necessary. Chapters~\ref{ch:03} and \ref{ch:04} develop the geometric ideas; \citet{hatcher2002} and \citet{oksendal2003} provide advanced continuations in topology and stochastic analysis.

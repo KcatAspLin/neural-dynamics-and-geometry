@@ -1,0 +1,177 @@
+\chapter{Probability and Statistics Reference}\label{app:c}
+
+\section*{Purpose and learning objectives}
+Probability specifies a data-generating model; statistics uses observations to estimate or compare such models. This appendix reviews the quantities needed for covariance, latent models, uncertainty, cross-validation, and surrogate analyses. Readers should be able to distinguish a random variable from its realization, a likelihood from a posterior, and sampling uncertainty from a scientific null hypothesis. \citet{ev_blitzstein2019} provides a full introductory treatment of probability.
+
+\section{Random variables and distributions}
+A random variable \(X\) is a numerical function of a random outcome. A realization is written \(x\). For a discrete variable, a probability mass function satisfies \(p(x)\geq0\) and \(\sum_xp(x)=1\). For a continuous variable with density \(p\), probabilities are integrals:
+\[
+\Pr(a\leq X\leq b)=\int_a^b p(x)\,\dd x.
+\]
+A density is not a probability at a point and can exceed one. A continuous variable has zero probability of taking any particular value, although it must take some value.
+
+The joint distribution \(p(x,y)\) describes two variables together. Marginalization sums or integrates out a variable:
+\[
+p(x)=\sum_y p(x,y)
+\quad\text{or}\quad
+p(x)=\int p(x,y)\,\dd y.
+\]
+For a discrete event of positive probability, \(p(x\mid y)=p(x,y)/p(y)\). Conditional densities use the analogous ratio where \(p(y)>0\). Independence means \(p(x,y)=p(x)p(y)\), a stronger property than zero covariance.
+
+\begin{example}[Zero correlation without independence]
+Let \(X\) be uniform on \([-1,1]\), and let \(Y=X^2\). Then \(\E X=0\) and \(\E X^3=0\), so \(\Cov(X,Y)=0\). Yet \(Y\) is determined exactly by \(X\). A linear correlation can miss a nonlinear relationship.
+\end{example}
+
+\section{Expectation, covariance, and total variability}
+For an integrable function \(g\),
+\[
+\E[g(X)]=\sum_xg(x)p(x)
+\quad\text{or}\quad
+\E[g(X)]=\int g(x)p(x)\,\dd x.
+\]
+The mean is \(\mu=\E X\), the variance is \(\Var(X)=\E[(X-\mu)^2]\), and covariance is
+\[
+\Cov(X,Y)=\E[(X-\E X)(Y-\E Y)].
+\]
+For a vector \(Y\in\R^p\), its covariance matrix is
+\[
+\Sigma=\E[(Y-\mu)(Y-\mu)^\top].
+\]
+The diagonal gives individual variances and the off-diagonal entries give pairwise covariances. Correlation rescales covariance by standard deviations when these are nonzero.
+
+For a fixed matrix \(A\) and vector \(b\),
+\[
+\E[AY+b]=A\mu+b,\qquad
+\Cov(AY+b)=A\Sigma A^\top.
+\]
+This identity explains why a change of neural units or normalization changes a covariance spectrum. Translation does not change covariance; unequal rescaling does.
+
+The law of total expectation states \(\E Y=\E[\E(Y\mid C)]\). For a scalar \(Y\), the law of total variance is
+\begin{equation}\label{eq:c-totalvariance}
+\Var(Y)=\Var(\E[Y\mid C])+\E[\Var(Y\mid C)].
+\end{equation}
+The first term measures variation of condition means; the second measures within-condition variation. To derive it, write
+\[
+Y-\E Y=\{Y-\E[Y\mid C]\}+\{\E[Y\mid C]-\E Y\}.
+\]
+The cross term has expectation zero after conditioning on \(C\). The analogous identity holds for covariance matrices. Trial-averaging suppresses one component of variability and therefore changes the object analyzed by PCA.
+
+\section{Gaussian models}
+A scalar Gaussian \(X\sim\mathcal N(\mu,\sigma^2)\), \(\sigma>0\), has density
+\[
+p(x)=\frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right).
+\]
+For a positive definite covariance \(\Sigma\), a \(p\)-dimensional Gaussian has density
+\[
+p(y)=\frac{\exp[-(y-\mu)^\top\Sigma^{-1}(y-\mu)/2]}
+{(2\pi)^{p/2}(\det\Sigma)^{1/2}}.
+\]
+A singular Gaussian is a valid distribution concentrated on the affine subspace $\mu+\operatorname{im}\Sigma$, but does not have this full-dimensional density. Its covariance can still be represented by a low-rank factor.
+
+If \(z\sim\mathcal N(0,I_k)\), \(\varepsilon\sim\mathcal N(0,\Psi)\), and \(z,\varepsilon\) are independent, then
+\[
+y=\mu+Wz+\varepsilon
+\quad\Longrightarrow\quad
+\Cov(y)=WW^\top+\Psi.
+\]
+This is the covariance structure behind factor analysis. The matrix \(WW^\top\) captures shared latent variation; the specified form of \(\Psi\) determines what the model treats as residual noise.
+
+\begin{example}
+Take \(W=(1,2)^\top\), \(\Psi=0.1I_2\). Then
+\[
+\Sigma=\begin{pmatrix}1.1&2\\2&4.1\end{pmatrix}.
+\]
+The latent signal is one-dimensional but the observed covariance has full rank. Exact matrix rank therefore fails to recover latent dimension in the presence of full-rank noise.
+\end{example}
+
+\section{Likelihood and estimation}
+For observations \(y_{1:n}\) and a parameter \(\theta\), the likelihood is the data probability or density viewed as a function of \(\theta\):
+\[
+L(\theta;y_{1:n})=p_\theta(y_{1:n}).
+\]
+It is not a distribution over \(\theta\) unless normalized with an appropriate prior in a Bayesian model. If observations are independent under the model, the log-likelihood is
+\[
+\ell(\theta)=\sum_{i=1}^n\log p_\theta(y_i).
+\]
+A maximum-likelihood estimate maximizes \(\ell\). Assuming independence when the data are temporally dependent can misrepresent both the likelihood and uncertainty.
+
+For independent Poisson counts \(N_i\sim\operatorname{Poisson}(\lambda\Delta)\), where \(\Delta\) is bin duration and \(\lambda\) is a firing rate,
+\[
+\ell(\lambda)
+=\sum_i\{N_i\log(\lambda\Delta)-\lambda\Delta-\log(N_i!)\}.
+\]
+For positive total count, setting the derivative to zero gives the interior maximizer below. If every count is zero, the maximum occurs at the boundary $\widehat\lambda=0$, assuming the parameter space includes zero. In both cases,
+\[
+\widehat\lambda=\frac{\sum_iN_i}{n\Delta}.
+\]
+Counts are dimensionless; dividing by total recording time yields a rate. A Poisson model assumes equality of conditional mean and variance, so overdispersion or dependencies require additional modeling.
+
+\section{Bayesian inference}
+Bayes' rule combines a prior \(p(\theta)\) and likelihood:
+\[
+p(\theta\mid y)
+=\frac{p(y\mid\theta)p(\theta)}
+{\int p(y\mid\theta')p(\theta')\,\dd\theta'}.
+\]
+The denominator is the evidence or marginal likelihood. A posterior predictive distribution averages over uncertainty:
+\[
+p(y_{\mathrm{new}}\mid y)
+=\int p(y_{\mathrm{new}}\mid\theta)p(\theta\mid y)\,\dd\theta.
+\]
+
+\begin{example}[Gaussian mean estimation]
+Let \(y_i\mid\mu\sim\mathcal N(\mu,\sigma^2)\) independently, with known \(\sigma^2\), and prior \(\mu\sim\mathcal N(\mu_0,\tau_0^2)\). Completing the square gives
+\[
+\tau_n^{-2}=\tau_0^{-2}+n\sigma^{-2},\qquad
+\mu_n=\tau_n^2(\mu_0\tau_0^{-2}+n\bar y\,\sigma^{-2}).
+\]
+The posterior is \(\mathcal N(\mu_n,\tau_n^2)\). Its precision is the sum of prior and data precisions. This illustrates how regularization can be expressed as a prior, while also making the prior's influence explicit.
+\end{example}
+
+\section{Testing and confidence intervals}
+A test statistic \(T(Y)\) measures a prespecified discrepancy. A \(p\)-value is the probability, under a stated null model, of a statistic at least as extreme as the observed value. It is not the probability that the null is true and is not an effect size.
+
+A \(95\%\) frequentist confidence procedure has coverage \(0.95\) under repeated sampling from its assumed model. Once a particular interval is observed, the fixed parameter is either in it or not. A Bayesian credible interval instead has a specified posterior probability conditional on data and prior. Both require their assumptions; neither automatically quantifies uncertainty due to an unmodeled bias.
+
+Multiple analyses selected after inspecting the data create another source of uncertainty. If \(m\) valid null tests are performed, the Bonferroni threshold \(\alpha/m\) controls the probability of at least one false rejection at most \(\alpha\), by the union bound. It is conservative and addresses a specific family of tests; it does not compensate for an undisclosed search over preprocessing choices.
+
+\section{Cross-validation and leakage}
+Cross-validation estimates predictive performance on observations excluded from fitting. Choose the split to match the desired generalization: new trials, sessions, animals, stimuli, or future time intervals. Fit centering, scaling, feature selection, latent dimensions, and hyperparameters using training data only. A separate validation stage selects hyperparameters; a final held-out test evaluates the selected procedure.
+
+For time series, random time-bin splits can give neighboring train and test observations with nearly identical states. Noncausal smoothing may transfer test information into training data. Use blocked or trial-level splits and a gap exceeding the filter's effective support when appropriate. If an alignment or decoder is estimated using test labels, the resulting score measures supervised fitting to those labels, not label-free generalization.
+
+A low reconstruction error can be an inappropriate selection criterion. A flexible latent model can memorize observations, while an overly simple noise model can force extra latent dimensions to absorb residual correlations. Evaluate predictive likelihood, reconstruction, behavior, and dynamical forecasts as distinct quantities rather than assuming that one score answers every question.
+
+\section{Bootstrap uncertainty and surrogate hypotheses}
+The nonparametric bootstrap resamples observed units with replacement and recomputes an estimator. It approximates how that estimator varies under repeated sampling, subject to assumptions; \citet{ev_efron1979} introduced the foundational framework. A simple iid bootstrap resamples independent observations. Cluster or block procedures are needed when the sampling units are dependent.
+
+For neural recordings, resampling time bins estimates a different uncertainty from resampling trials, neurons, sessions, or animals. Neurons within a simultaneously recorded population are not interchangeable independent samples of whole experiments. State which population of possible repetitions the interval refers to.
+
+Topological statistics require additional care. Resampling points with replacement creates duplicates and changes coverage. A bootstrap distribution of the longest bar is not automatically a confidence statement about the true support's topology. Check the inferential assumptions or use the resampling calculation as a sensitivity analysis with appropriately modest wording.
+
+A surrogate test instead generates data under an explicit alternative explanation, such as independent neurons with preserved firing-rate profiles. It asks whether a statistic exceeds what that explanation predicts. Bootstrap uncertainty and a surrogate null answer different questions even when both use resampling. For randomly generated null statistics, use a correctly calibrated Monte Carlo or permutation test rather than reporting zero from a finite sample; see \citet{ev_phipson2010} and Section~\ref{sec:12-nulls}.
+
+\section{Basic stochastic processes}
+A stochastic process is a collection of random variables indexed by time. A first-order Markov process satisfies
+\[
+p(x_{t+1}\mid x_t,x_{t-1},\ldots)=p(x_{t+1}\mid x_t).
+\]
+This is a property of a chosen state representation. Observing only part of a Markov state can introduce apparent memory. A stationary process has time-shift-invariant joint distributions; a weaker second-order stationarity assumes constant mean and covariance depending only on lag.
+
+For a stationary scalar series with autocorrelation \(\rho(k)\), the sample mean has exact variance
+\[
+\Var(\bar X_n)=\frac{\sigma^2}{n}
+\left[1+2\sum_{k=1}^{n-1}\left(1-\frac{k}{n}\right)\rho(k)\right].
+\]
+This follows by summing all pairwise covariances in \(n^{-2}\sum_{i,j}\Cov(X_i,X_j)\). Positive autocorrelation increases uncertainty relative to independent samples. A densely sampled smooth trajectory can therefore contain far fewer independent pieces of information than its number of time bins suggests.
+
+\section*{Exercises and quick checks}
+\begin{enumerate}
+\item \textbf{Introductory.} Derive \(\Var(aX+b)=a^2\Var(X)\) and explain why standardization changes a PCA covariance spectrum.
+\item \textbf{Intermediate.} Apply the law of total variance to a neuron recorded under two equally probable conditions with different means and identical within-condition variance.
+\item \textbf{Intermediate.} A zero result appears among \(999\) upper-tail null simulations. What is the smallest standard plus-one Monte Carlo \(p\)-value, and what assumption makes its rank interpretation valid?
+\item \textbf{Advanced.} Design a cross-validation scheme for a smoothed multi-session recording and describe a null model that preserves behavior-related tuning but removes trial-specific coordination.
+\end{enumerate}
+\section*{Summary and further reading}
+Probability models define what is random; sampling designs define what could have been repeated; and validation procedures define what is being predicted. Keeping these three statements explicit prevents many errors in interpreting dimensionality and dynamics. A common misconception is that a small \(p\)-value measures the probability of a mechanism being correct; it instead concerns a statistic under a specified null. See \citet{ev_blitzstein2019} for probability foundations, \citet{ev_efron1979} for the bootstrap, and Chapter~\ref{ch:12} for inference in neural geometry.

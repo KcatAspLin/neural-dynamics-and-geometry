@@ -1,0 +1,177 @@
+\chapter{Topology and topological data analysis}\label{ch:04}
+\begin{insight}{Learning objectives}
+Build a simplicial complex from distances; calculate a boundary matrix and a homology group; explain births and deaths in a filtration; state what persistence stability does and does not guarantee; and separate a topological feature from a claim about a particular manifold or neural mechanism.
+\end{insight}
+
+\section{The question that a two-dimensional picture cannot answer}
+Suppose observations surround a missing central region. Is there a robust loop, or did projection, sparse sampling, or an embedding algorithm create the gap? Topological data analysis (TDA) constructs spaces from the observations at multiple scales and measures features that survive changes of scale. It does not eliminate modeling choices: the metric, scale convention, sample, and statistical comparison remain part of the claim.
+
+Chapter~\ref{ch:03} defined open sets, continuity, and homeomorphism. This chapter adds computable invariants. An invariant is a quantity unchanged under a specified notion of equivalence. Equal invariants need not imply equivalence: two different objects can receive the same summary.
+
+\section{Connectedness, compactness, and deformation}
+A space is \emph{connected} when it cannot be partitioned into two disjoint nonempty open subsets. It is \emph{path-connected} when any two points can be joined by a continuous map $c:[0,1]\to S$. Path-connectedness implies connectedness, but the converse fails for some pathological spaces. In manifolds and ordinary finite simplicial complexes, connected components are path-connected, so the distinction rarely affects the examples here.
+
+A space is \emph{compact} when every open cover has a finite subcover. In Euclidean space this is equivalent to being closed and bounded. Compactness is a topological condition; closed and bounded is the Euclidean characterization, not the general definition. It ensures, for example, that continuous real functions attain maxima and minima. The circle and sphere are compact; an open interval and an infinite plane are not.
+
+Two continuous maps $f,g:S\to T$ are homotopic if there is a continuous $H:S\times[0,1]\to T$ with $H(x,0)=f(x)$ and $H(x,1)=g(x)$. Here the extra coordinate continuously deforms one map into the other. Spaces are homotopy equivalent if maps in both directions compose to maps homotopic to the respective identities. A solid disk is homotopy equivalent to a point, because it contracts continuously, but is not homeomorphic to a point. Homotopy equivalence preserves less information than homeomorphism.
+
+\subsection{Loops and the fundamental group: a first view}
+Choose a basepoint $x_0$. A based loop begins and ends there. Deform loops while keeping their endpoints at $x_0$; the resulting equivalence classes form the fundamental group $\pi_1(S,x_0)$, with multiplication given by concatenation. A group is a set with an associative product, an identity, and inverses. In an abelian group the product also commutes. Loop concatenation need not commute.
+
+For a circle, loop classes are labeled by integer winding number, so $\pi_1(S^1)\cong\Z$. A torus has two independent commuting winding directions, giving $\Z^2$. Every loop on a sphere contracts, so $\pi_1(S^2)$ is trivial. Nevertheless the sphere encloses a two-dimensional shell: loops alone do not describe every topological feature. Homology supplies a family of linear-algebraic summaries in different dimensions \citep{hatcher2002}.
+
+\section{Simplices and simplicial complexes}
+A geometric $k$-simplex is the convex hull of $k+1$ affinely independent vertices. A 0-simplex is a vertex, a 1-simplex an edge, a 2-simplex a filled triangle, and a 3-simplex a filled tetrahedron. ``Filled'' matters: the boundary of a triangle consists of three edges and has a loop, whereas a 2-simplex fills that loop.
+
+A geometric simplicial complex is a collection of simplices containing all faces of each simplex and such that intersections are common faces. An \emph{abstract simplicial complex} is a collection $K$ of finite vertex subsets closed under taking subsets. Its members are simplices, and a subset of size $k+1$ is a $k$-simplex. This combinatorial description allows calculations without arranging every simplex in the observed ambient space. Its geometric realization is a topological space made by gluing standard simplices along shared faces.
+
+\subsection{Two constructions from a point cloud}
+Let $P=\{x_1,\ldots,x_n\}$ in a metric space. The Vietoris--Rips complex at scale $\epsilon$ is
+\begin{equation}\label{eq:rips}
+\operatorname{VR}_\epsilon(P)=\{\sigma\subseteq\{1,\ldots,n\}:d(x_i,x_j)\leq\epsilon\text{ for all }i,j\in\sigma\}.
+\end{equation}
+Thus edges join pairs at distance at most $\epsilon$, and every clique fills its higher-dimensional simplex. Our scale is edge length, not ball radius. Library conventions sometimes differ by a factor of two; this factor changes reported births and deaths.
+
+The \v{C}ech complex at ball radius $r$ contains a simplex $\sigma$ when the balls centered at its vertices have a common intersection:
+\begin{equation}
+\check C_r(P)=\{\sigma:\bigcap_{i\in\sigma}B_r(x_i)\ne\varnothing\}.
+\end{equation}
+Use either open balls with strict thresholds or closed balls with non-strict thresholds consistently; isolated equality scales do not change the conceptual argument. Pairwise intersections are insufficient to guarantee a common intersection of all balls. In Euclidean space, the nerve theorem relates the \v{C}ech complex to the union of balls under the usual good-cover conditions, satisfied by suitable convex-ball covers: the two have the same homotopy type. This gives a geometric reason for computing the complex.
+
+With closed balls and our edge convention,
+\begin{equation}\label{eq:rips-cech}
+\check C_r(P)\subseteq\operatorname{VR}_{2r}(P)\subseteq\check C_{2r}(P).
+\end{equation}
+For the first inclusion, a common point lies within $r$ of every vertex, so triangle inequality bounds pairwise distances by $2r$. For the second, select any vertex of a Rips simplex: it lies within $2r$ of every other vertex and hence in the intersection of their radius-$2r$ balls. Sharper dimension-dependent bounds exist, but these elementary inclusions already explain why the constructions are related yet not identical.
+
+\section{The algebra needed for homology}
+\subsection{Finite fields and chains}
+A field supports addition, subtraction, multiplication, and division by nonzero elements. The real numbers are a field. The two-element field $\F_2=\{0,1\}$ uses arithmetic modulo two: $1+1=0$, so addition and subtraction coincide. Vector spaces over $\F_2$ obey the same linear-algebra rules as real vector spaces, with this different arithmetic.
+
+Fix a field $\F$, usually $\F_2$. The chain space $C_k(K;\F)$ has one basis vector for each $k$-simplex. A chain is a formal linear combination of simplices. Over $\F_2$ a chain simply selects a subset, with addition canceling simplices selected twice. Over other fields, orient simplices and record signs.
+
+For ordinary homology, set $C_{-1}=0$ and $\partial_0=0$. For $k\geq1$, the boundary operator $\partial_k:C_k\to C_{k-1}$ sends an oriented simplex to its oriented faces:
+\begin{equation}\label{eq:boundary}
+\partial_k[v_0,\ldots,v_k]=\sum_{i=0}^k(-1)^i[v_0,\ldots,\widehat v_i,\ldots,v_k].
+\end{equation}
+The hat means omit that vertex. Extend the formula linearly. For example $\partial_1[a,b]=[b]-[a]$ and $\partial_2[a,b,c]=[b,c]-[a,c]+[a,b]$.
+
+\begin{proposition}[The boundary of a boundary is zero]\label{prop:boundary-zero}
+For every simplicial complex, $\partial_{k-1}\partial_k=0$.
+\end{proposition}
+\begin{proof}
+Each codimension-two face is obtained by deleting two vertices in either order. These two contributions have opposite signs and cancel. In the triangle example, applying $\partial_1$ gives $(c-b)-(c-a)+(b-a)=0$. Over $\F_2$, the same cancellation is $1+1=0$.
+\end{proof}
+
+\subsection{Cycles, boundaries, and quotients}
+A $k$-cycle is a chain with zero boundary; these form $Z_k=\ker\partial_k$. A $k$-boundary is the boundary of a $(k+1)$-chain; these form $B_k=\operatorname{im}\partial_{k+1}$. Proposition~\ref{prop:boundary-zero} implies $B_k\subseteq Z_k$.
+
+Two cycles are equivalent when their difference is a boundary. The quotient vector space $Z_k/B_k$ groups each cycle together with all versions obtained by adding boundaries. A quotient does not divide numerical values: it identifies objects declared equivalent. This identification removes loops that merely surround an already filled region.
+
+\begin{definition}[Homology and Betti numbers]\label{def:homology}
+The $k$th simplicial homology group with coefficients in $\F$ is
+\begin{equation}
+H_k(K;\F)=\ker\partial_k/\operatorname{im}\partial_{k+1}.
+\end{equation}
+Over a field it is a vector space, and its dimension $\beta_k=\dim H_k(K;\F)$ is the $k$th Betti number. We use ordinary, not reduced, homology, so a nonempty connected space has $\beta_0=1$.
+\end{definition}
+The basic interpretation is components for $\beta_0$, independent unfilled loops for $\beta_1$, and two-dimensional enclosing shells for $\beta_2$. ``Hole'' is useful shorthand but the chain quotient is the definition. Coefficient choice can affect homology for some spaces; the familiar circle, sphere, and torus examples below have the displayed Betti numbers over every field.
+
+\begin{example}[The boundary matrix of a triangle]\label{ex:triangle-homology}
+Order vertices $(a,b,c)$ and edges $(ab,bc,ca)$. Over $\F_2$,
+\begin{equation}
+\partial_1=\begin{bmatrix}1&0&1\\1&1&0\\0&1&1\end{bmatrix}.
+\end{equation}
+Its rank is two, so the edge-cycle space has dimension $3-2=1$, generated by the sum of all three edges. With no filled face, $B_1=0$, so $\beta_1=1$. Add the filled triangle and $\partial_2=(1,1,1)^T$ has rank one; now the same cycle is a boundary, so $\beta_1=0$. In both cases $\beta_0=3-2=1$.
+\end{example}
+More generally, if $n_k$ is the number of $k$-simplices,
+\begin{equation}\label{eq:betti-ranks}
+\beta_k=n_k-\rank(\partial_k)-\rank(\partial_{k+1}).
+\end{equation}
+This follows from rank--nullity and the quotient dimension formula. Computing homology is therefore concrete linear algebra, although the number of simplices can grow very rapidly with sample size.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{lcccl}
+\toprule Space & $\beta_0$ & $\beta_1$ & $\beta_2$ & Interpretation\\\midrule
+Point or filled disk & 1 & 0 & 0 & Connected and contractible\\
+Circle $S^1$ & 1 & 1 & 0 & One independent loop\\
+Sphere surface $S^2$ & 1 & 0 & 1 & One enclosing shell\\
+Torus surface $T^2$ & 1 & 2 & 1 & Two winding directions and a shell\\
+Two separate circles & 2 & 2 & 0 & Two components and two loops\\
+Figure-eight graph & 1 & 2 & 0 & Two loops meeting at a junction\\\bottomrule
+\end{tabular}
+\caption{Ordinary Betti numbers over a field. Equal entries do not classify spaces up to homeomorphism. A filled ball differs from its sphere boundary.}
+\end{table}
+
+\section{Cohomology: measuring cycles with functions}
+Homology starts with combinations of simplices. Cohomology starts with functions on these combinations. Define $C^k=\operatorname{Hom}(C_k,\F)$, the vector space of linear maps from chains to the field. A $k$-cochain can be stored as one value per oriented $k$-simplex. The coboundary $\delta^k:C^k\to C^{k+1}$ is
+\begin{equation}
+(\delta a)(c)=a(\partial c).
+\end{equation}
+Its matrix is the transpose of the next boundary matrix. Since $\partial_{k-1}\circ\partial_k=0$, also $\delta^{k+1}\circ\delta^k=0$. Cohomology is $H^k=\ker\delta^k/\operatorname{im}\delta^{k-1}$: cocycles modulo coboundaries.
+
+For a vertex function $f$, the edge coboundary is $(\delta f)_{ij}=f_j-f_i$. A 1-cocycle has edge values whose oriented sum around every filled triangle is zero. It can nevertheless have nonzero sum around an unfilled global loop. Over a field and for finite complexes, homology and cohomology have equal dimensions; cohomology is dual to homology. Their computational representatives answer different questions: a cycle traces a topological feature, while a cocycle can help construct a coordinate that changes around it.
+
+\section{Filtrations and persistent homology}
+A single neighborhood scale is arbitrary. A filtration is a nested family $K_{\epsilon_1}\subseteq K_{\epsilon_2}\subseteq\cdots$, such as Rips complexes with increasing edge threshold. Inclusion induces linear maps between the homology spaces. Persistent homology follows classes through these maps.
+
+A class is born when a new independent feature appears and dies when it becomes zero or merges into an older class under the inclusion maps. For $H_0$, components are born as vertices appear and younger components die as edges join them. For $H_1$, edges can complete loops, and higher simplices can subsequently fill them. A finite filtered complex over a field admits an interval decomposition: its persistence information can be summarized by intervals $[b,d)$, with $d=\infty$ for features never killed. The multiset of intervals is the barcode; plotting pairs $(b,d)$ gives the persistence diagram. Persistence is $d-b$, measured in filtration units, not necessarily physical time.
+
+\begin{example}[Four points on a circle, exactly solved]\label{ex:square-persistence}
+Take $(1,0),(0,1),(-1,0),(0,-1)$ and the Rips convention in \eqref{eq:rips}. Below $\epsilon=\sqrt2$, all four vertices are disconnected. At $\sqrt2$, four side edges appear, producing one connected component and one loop. No diagonal or triangle yet exists. At $\epsilon=2$, all pairwise edges exist and the full 3-simplex is filled, so the complex is contractible. Thus the $H_1$ barcode has the single interval $[\sqrt2,2)$. The three finite $H_0$ intervals die at $\sqrt2$, while one component persists forever.
+\end{example}
+This example also shows why computing graph cycles alone is not homology of a Rips complex. At the largest scale the complete graph has many graph cycles, but the higher-dimensional simplices fill them. To compute $H_k$ correctly one needs simplices through dimension $k+1$, even when only dimension-$k$ features are reported.
+
+\section{Stability is a perturbation guarantee, not a significance test}
+The bottleneck distance $d_B$ between persistence diagrams is the smallest possible largest matching cost, allowing features to match the diagonal. The cost between $(b,d)$ and $(b',d')$ is $\max(|b-b'|,|d-d'|)$. Matching $(b,d)$ to the diagonal costs $(d-b)/2$. Essential classes are matched to essential classes, with birth difference as cost.
+
+\begin{theorem}[A finite-complex persistence stability statement]\label{thm:persistence-stability}
+Let $K$ be a finite simplicial complex, and let $f,g$ assign filtration values to its simplices, with each face appearing no later than its containing simplex. Compute homology over the same field. If $\max_{\sigma\in K}|f(\sigma)-g(\sigma)|\leq\delta$, then the persistence diagrams satisfy $d_B(D_f,D_g)\leq\delta$.
+\end{theorem}
+The underlying reason is that $K^f_a\subseteq K^g_{a+\delta}$ and conversely. The two persistence systems therefore track one another after a scale shift. Turning these inclusions into an optimal diagram matching is the substantive stability result; it is not proved by comparing Betti numbers at one scale. The classical function-based theorem concerns tame functions on suitable spaces \citep{cohensteiner2007}; the finite filtered-complex version is the setting needed here.
+
+For two point clouds with a fixed correspondence and each point displaced by at most $\eta$, triangle inequality changes every pairwise distance by at most $2\eta$. The Rips value of a simplex, its largest edge length, changes by at most $2\eta$. Theorem~\ref{thm:persistence-stability} thus yields a $2\eta$ bound. This example states the correspondence and metric assumptions; it does not cover arbitrary addition of outliers by pretending that all pairwise distances changed slightly.
+
+\begin{misconception}
+A long interval is not automatically a statistically significant biological feature. Stability says that sufficiently small metric perturbations cannot erase it cheaply. It does not say that an appropriate null model rarely produces it, that sampling is dense, that a missing region is a topological hole of the underlying state space, or that the system has attracting dynamics.
+\end{misconception}
+
+\section{Worked interpretations: ring, sphere, torus, and no clear structure}
+For a densely sampled circle with small noise, expect a scale range where nearby samples connect around the ring before the central gap fills. A dominant $H_1$ interval is compatible with this model. Its birth scale reflects sample spacing and density as well as geometry; its death scale reflects the filtration and metric. Heavy noise can fill the center, sparse sampling can leave gaps, and unequal sampling can produce spurious short features.
+
+For a sphere surface, useful recovery requires coverage in two local dimensions. The expected signature is one robust $H_2$ class with no corresponding robust $H_1$ class, after accounting for sampling. For a torus surface, one seeks two $H_1$ classes and one $H_2$ class with a compatible range of scales, as well as geometric and behavioral checks. Failure to detect $H_2$ may reflect insufficient sampling or computational truncation rather than absence of a torus.
+
+Consider instead a Gaussian cloud. Its sampling distribution has no compact ring-shaped support, yet a finite sample can have long-looking gaps, especially after projection or parameter selection. The honest outcome may be that the observed persistence statistic is not exceptional relative to matched null samples. ``No convincing topological evidence'' is an analysis result; it is not a failure of the software. Nor does it prove the absence of all topology: power depends on sample size, observation map, noise, and the particular feature tested.
+
+Even exact $\beta_0=1,\beta_1=1,\beta_2=0$ does not prove that a space is a circle. An annulus deformation retracts to a circle and has the same Betti numbers, despite being two-dimensional. A circle with an attached contractible branch also has those Betti numbers and is not a one-dimensional manifold at its junction. Homology identifies a class of topological summaries, not a unique geometric object.
+
+\section{Circular coordinates from persistent cohomology}
+A circle-valued coordinate can retain periodic structure without an arbitrary global cut. The method of \citet{desilva2011} starts from a persistent degree-one cohomology class, chooses a scale where it is present, lifts an appropriate finite-field cocycle to an integral cocycle, and smooths it using real coefficients. The integral lift is a real mathematical requirement: a finite-field class does not universally guarantee the required lift, and torsion can obstruct a naive construction.
+
+Work within one connected component of the complex. Suppose an integer-valued cocycle $a_{ij}$ on oriented edges has been obtained. Find real vertex values $f_i$ minimizing
+\begin{equation}\label{eq:circular-smoothing}
+\sum_{(i,j)}w_{ij}(a_{ij}+f_j-f_i)^2,
+\end{equation}
+with positive edge weights and one fixed vertex value to remove the additive ambiguity. Then $a'=a+\delta f$ is a real cocycle in the same cohomology class. Integrate $a'$ along paths from a base vertex and reduce the result modulo one. Different paths differ by a closed loop, on which $a'$ has integer integral, so the circle coordinate is well defined modulo one. Multiplying by $2\pi$ gives an angle.
+
+This construction explains why cohomology can produce coordinates, whereas a Betti number alone cannot. The origin and orientation of the angle are arbitrary. Two torus coordinates also permit changes of integer homology basis; they need not match two biological variables without independent alignment. Coordinate smoothness can be influenced by density and weighting. Behavioral decoding should therefore use held-out observations and state how circular phase was aligned.
+
+\section{What a complete analysis must report}
+A topological claim should identify the observation matrix and sampling unit, transformations, distance metric, complex and scale convention, coefficient field, dimensions computed, statistic chosen, null family, and uncertainty procedure. Parameter searching must be included in the null analysis or controlled using held-out data. Temporal dependence requires block or trial-aware resampling. Independently shuffling time samples within each neuron destroys temporal autocorrelation and coordination and may create an unrealistically easy null; jointly permuting complete rows leaves point-cloud persistent homology unchanged.
+
+The missing mechanism is as important as the recovered structure. A persistence diagram does not determine a vector field, direction of travel, causal role, or attraction. It also discards locations of features unless representatives are retained. A workflow that links topology to neural function must return to the original observations and independent variables after calculating the diagram. Chapters~\ref{ch:09} and \ref{ch:11} implement that transition explicitly.
+
+\section{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} Calculate $\partial_1\partial_2$ for an oriented triangle over $\R$ and over $\F_2$. Explain why the two calculations express the same cancellation.
+\item \textbf{Introductory.} Find $\beta_0$ and $\beta_1$ for a graph with four vertices forming a square and one diagonal, with no filled triangles. Recalculate after filling both triangles.
+\item \textbf{Intermediate.} Reproduce Example~\ref{ex:square-persistence} and compare its Rips thresholds with \v{C}ech ball radii. State the factor-of-two convention before interpreting numerical output.
+\item \textbf{Intermediate.} Derive \eqref{eq:betti-ranks} using rank--nullity and the fact that boundaries are cycles.
+\item \textbf{Intermediate.} Give two spaces with equal $\beta_0,\beta_1,\beta_2$ but different local dimension or manifold status. Explain which stronger claim the Betti numbers cannot support.
+\item \textbf{Advanced.} Design a null test for the longest $H_1$ interval in a temporally correlated neural dataset. Specify what the null preserves and what it destroys, including every preprocessing selection.
+\item \textbf{Advanced.} Show that replacing $a$ by $a+\delta f$ leaves integrals around closed loops unchanged. Explain why reduction modulo one requires integral periods.
+\end{enumerate}
+
+\section{Summary and further reading}
+Homology converts connectivity into linear algebra by quotienting cycles by boundaries. Persistence tracks those classes across scale, and stability bounds their sensitivity to specified perturbations. Neither homology nor persistence classifies all spaces or supplies a dynamical mechanism. \citet{hatcher2002} develops the algebraic topology; \citet{cohensteiner2007} provides the foundational stability result; \citet{desilva2011} explains how persistent cohomology supports circular coordinates. These mathematical statements become scientific evidence only after an observation model and explicit statistical controls are supplied.

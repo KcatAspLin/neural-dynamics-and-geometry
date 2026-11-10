@@ -1,0 +1,136 @@
+\chapter{Calculus and Differential Equations Reference}\label{app:b}
+
+\section*{Purpose and learning objectives}
+The goal is to make local approximation and time evolution precise. After this appendix, readers should be able to interpret a derivative as a linear map, apply the multivariable chain rule, derive a local quadratic approximation, and check whether a numerical time step respects a simple stability condition. These tools support Chapters~\ref{ch:02}, \ref{ch:03}, and \ref{ch:10}. A broad calculus reference is \citet{ev_strang1991}.
+
+\section{Limits and continuity}
+The statement \(f(x)\to L\) as \(x\to a\) means that for every tolerance \(\epsilon>0\), there is a radius \(\delta>0\) such that
+\[
+0<\norm{x-a}<\delta \quad\Longrightarrow\quad \norm{f(x)-L}<\epsilon.
+\]
+The function is continuous at \(a\) if \(f(a)\) is defined and the limit is \(f(a)\). The quantifier order matters: \(\delta\) may depend on \(\epsilon\), but must work for every point sufficiently close to \(a\).
+
+Continuity preserves convergence of sequences. It does not imply differentiability: \(f(x)=|x|\) is continuous at zero but has different slopes from the left and right. Conversely, differentiability implies continuity.
+
+\section{Differentiability is a linear approximation}
+For \(f:\R^p\to\R^m\), differentiability at \(x\) means there exists a linear map \(Df(x)\) such that
+\[
+f(x+h)=f(x)+Df(x)h+r(h),\qquad
+\frac{\norm{r(h)}}{\norm h}\longrightarrow0
+\quad\text{as }h\to0.
+\]
+The Jacobian matrix represents this map. Partial derivatives alone need not guarantee differentiability, but continuous partial derivatives in a neighborhood do.
+
+For a scalar function, \(Df(x)h=\nabla f(x)^\top h\). Along a unit direction \(v\), the directional derivative is \(\nabla f(x)^\top v\); Cauchy--Schwarz implies its largest value is \(\norm{\nabla f(x)}\), attained in the gradient direction when the gradient is nonzero.
+
+\begin{example}
+Let \(f(x,y)=(x^2+y,xy)\). Its Jacobian is
+\[
+Df(x,y)=\begin{pmatrix}2x&1\\y&x\end{pmatrix}.
+\]
+Near \((1,2)\), a small displacement \((a,b)\) changes the output by approximately \((2a+b,2a+b)\). The omitted terms are \(a^2\) and \(ab\), both second order.
+\end{example}
+
+\section{The chain rule and Taylor expansion}
+If \(f:\R^p\to\R^m\) is differentiable at \(x\), and \(g:\R^m\to\R^q\) is differentiable at \(f(x)\), then
+\[
+D(g\circ f)(x)=Dg(f(x))Df(x).
+\]
+Matrix order follows the order of action: first change the input to \(f\), then propagate its output change through \(g\). For a trajectory \(x(t)\),
+\[
+\frac{\dd}{\dd t}L(x(t))
+=\nabla L(x(t))^\top\dot x(t).
+\]
+This identity turns gradient descent into a statement about loss change and turns a Lyapunov function into a statement about stability.
+
+If \(L\) has continuous second derivatives near \(x\), Taylor's theorem gives
+\[
+L(x+h)=L(x)+\nabla L(x)^\top h
++\frac12h^\top H(x)h+o(\norm h^2).
+\]
+If third derivatives are bounded in the neighborhood, the remainder can be bounded by a constant times \(\norm h^3\). The quadratic term measures how the local slope changes. Positive curvature in one direction does not exclude negative curvature in another.
+
+\begin{example}[A saddle]
+For \(L(x,y)=x^2-y^2\), the gradient vanishes at the origin and the Hessian is \(\diag(2,-2)\). Along the \(x\)-axis the origin is a minimum, while along the \(y\)-axis it is a maximum. A zero gradient does not establish a local minimum.
+\end{example}
+
+\section{Optimization conditions}
+At an interior local minimum of a differentiable function, \(\nabla L=0\). If \(L\) is twice differentiable there, its Hessian is positive semidefinite. These are necessary conditions. A stationary point with positive definite Hessian is a strict local minimum. A semidefinite Hessian is inconclusive: \(x^4\), \(-x^4\), and \(x^3\) all have zero first and second derivatives at zero, but different local behavior.
+
+A differentiable function is convex on a convex domain if
+\[
+L(y)\geq L(x)+\nabla L(x)^\top(y-x)
+\]
+for every \(x,y\) in the domain. Therefore every stationary point is a global minimum. For a twice continuously differentiable function on an open convex domain, positive semidefiniteness of the Hessian everywhere is equivalent to convexity. Local positive curvature at one point is not global convexity.
+
+For a differentiable constraint \(c(x)=0\) with nonzero gradient at a regular constrained extremum, the Lagrange multiplier condition is
+\[
+\nabla L(x)=\lambda\nabla c(x).
+\]
+Geometrically, all feasible tangent directions are orthogonal to \(\nabla c\), and the objective has no first-order change along them. For multiple constraints, the constraint gradients must satisfy the appropriate independence condition.
+
+\section{Ordinary differential equations}
+An initial-value problem is
+\[
+\dot x=f(t,x),\qquad x(t_0)=x_0.
+\]
+A solution is a differentiable function satisfying both equations on an interval. Equivalently,
+\[
+x(t)=x_0+\int_{t_0}^t f(s,x(s))\,\dd s.
+\]
+Continuity of \(f\) and local Lipschitz dependence on \(x\) are standard sufficient conditions for local existence and uniqueness. Global existence requires additional control preventing finite-time escape.
+
+\begin{example}[A finite-time failure of global existence]
+The smooth equation \(\dot x=x^2\), with \(x(0)=x_0>0\), has solution
+\[
+x(t)=\frac{x_0}{1-x_0t}.
+\]
+It diverges at \(t=1/x_0\). Smoothness of a vector field on all of \(\R\) does not by itself ensure that its trajectories exist for all positive times.
+\end{example}
+
+For \(\dot x=ax\), the solution is \(x(t)=x_0e^{at}\). For a matrix \(A\),
+\[
+\dot x=Ax,\qquad x(t)=e^{At}x_0,\qquad
+e^{At}=\sum_{j=0}^{\infty}\frac{t^jA^j}{j!}.
+\]
+If \(A=Q\Lambda Q^{-1}\), then \(e^{At}=Qe^{\Lambda t}Q^{-1}\). Matrix exponentials remain defined when diagonalization fails. Polynomial factors can arise from Jordan blocks, so eigenvalues alone do not describe finite-time amplification.
+
+\section{Numerical integration and its limits}
+Forward Euler approximates
+\[
+x_{n+1}=x_n+h f(t_n,x_n),
+\]
+with time step \(h>0\). For \(\dot x=-ax\), \(a>0\), the exact flow decays for every initial state. Euler instead gives \(x_{n+1}=(1-ah)x_n\), so decay requires
+\[
+|1-ah|<1,\qquad 0<h<2/a.
+\]
+A numerical instability can therefore be an integration artifact rather than a property of the differential equation.
+
+The classical fourth-order Runge--Kutta method uses
+\begin{align*}
+k_1&=f(t_n,x_n),\\
+k_2&=f(t_n+h/2,x_n+hk_1/2),\\
+k_3&=f(t_n+h/2,x_n+hk_2/2),\\
+k_4&=f(t_n+h,x_n+hk_3),\\
+x_{n+1}&=x_n+\frac h6(k_1+2k_2+2k_3+k_4).
+\end{align*}
+Under sufficient smoothness on a fixed bounded time interval, its global error is \(O(h^4)\). This statement does not guarantee a good answer for a large step or a stiff problem. Compare multiple tolerances or step sizes when an inferred bifurcation or relaxation time depends on numerical accuracy.
+
+\section{Finite differences and units}
+A central finite-difference derivative is
+\[
+f'(x)\approx\frac{f(x+h)-f(x-h)}{2h}.
+\]
+For sufficiently smooth \(f\), the truncation error is \(O(h^2)\). Making \(h\) extremely small amplifies floating-point cancellation and observation noise. For a noisy time series, differentiating then smoothing and smoothing then differentiating can agree for ideal linear operations on an infinite domain, but boundary handling, discrete implementation, and nonlinear preprocessing can make them differ.
+
+Units provide a simple independent check. In \(\tau\dot x=-x+Wr+I\), every term on the right must have the units of \(x\), and \(\tau\) has time units. A Jacobian of a continuous vector field with state coordinates in compatible units has eigenvalues with units of inverse time. A discrete transition Jacobian instead describes dimensionless per-step multiplication. Comparing the two requires the sampling interval.
+
+\section*{Exercises and quick checks}
+\begin{enumerate}
+\item \textbf{Introductory.} Compute the gradient and Hessian of \(L(x,y)=x^2+2xy+3y^2\).
+\item \textbf{Intermediate.} Show directly that \(L(x)=\norm x^2/2\) decreases along \(\dot x=-x\).
+\item \textbf{Intermediate.} For \(\dot x=-10x\), determine which Euler step sizes \(0.01,0.1,0.3\) are stable.
+\item \textbf{Advanced.} For gradient descent on \(L(x)=x^\top Hx/2\), with symmetric positive definite \(H\), derive the exact condition on step size for convergence.
+\end{enumerate}
+\section*{Summary and further reading}
+The recurring pattern is to state a differentiability assumption, retain the leading terms, and then identify the size and scope of the discarded terms. An approximation is useful because its error is controlled, not because the formula resembles a familiar model. A common misconception is that a stable differential equation remains stable under every numerical discretization; the Euler example shows why step size matters. See \citet{ev_strang1991} for calculus and Chapter~\ref{ch:02} for the stability concepts used here.

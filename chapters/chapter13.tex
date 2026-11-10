@@ -1,0 +1,203 @@
+\chapter{Critical Literature Review and Case Studies}\label{ch:13}
+
+\section*{Learning objectives}
+This chapter develops a disciplined way to read an interdisciplinary paper: identify its actual claim, reconstruct the assumptions connecting its method to that claim, credit the evidence it supplies, and distinguish a limitation from an error. By the end, readers should be able to compare an experimentally tested operational manifold, a topological description of activity, and a dynamical mechanism without treating them as interchangeable.
+
+\section{How to read these case studies}
+The studies below are selected for the conceptual issues they expose, not as an exhaustive ranking of the field. A strong study can contain modeling assumptions; an approximate mathematical description can be scientifically decisive. Equally, a later result can extend an earlier result's range without making the original result false. The distinction is especially important for the word \emph{manifold}, which is often explicitly operational in population neuroscience.
+
+For each case, the short \emph{study finding} reports the paper's empirical or methodological contribution. The subsequent \emph{inference audit} is this textbook's analysis, using the mathematics developed earlier. Proposed validations are suggestions, not claims that the original authors performed them. Exact bibliographic details and stable identifiers appear in the bibliography.
+
+\section{Head direction: a ring plus dynamical evidence}
+\subsection{Study finding}
+\citet{app_chaudhuri2019} analyzed mammalian head-direction population activity with unsupervised manifold methods. They identified a ring in waking and REM sleep, related its coordinate to heading, and examined flows toward the fitted manifold. Their attractor interpretation therefore used both geometry and off-manifold dynamics, rather than a ring image alone.
+
+\subsection{Inference audit}
+The relevant mathematical hypothesis is not merely that a circular variable can be decoded. It is that neural states are constrained to a continuous attracting set, with a direction along which the represented angle can change. If the set is a one-dimensional ring, then locally one direction is tangent and the remaining observed directions are transverse. This distinction creates a prediction that an ordinary tuning-curve statement lacks: a deviation transverse to the ring should relax differently from a change of angular coordinate.
+
+The off-manifold analysis matters precisely because it addresses that prediction. A fair critique must acknowledge it. Nonetheless, a local mean flux estimated from noisy population recordings is not the complete vector field of all neurons and inputs. Chapter~\ref{ch:12} explains why observation noise, hidden variables, and state-dependent sampling enter a drift estimate. These are general limitations of passive inference, not demonstrated errors in this paper.
+
+There is also an important assumption behind a common representational premise. Suppose a neural population represents a variable \(\theta\in S^1\). Its activity has the same topology as \(S^1\) if the encoding map is an embedding. Merely assigning the population a representational role does not imply that property. For example,
+\[
+g(\theta)=(\cos\theta,0)
+\]
+identifies two angles and has an interval as its image, whereas
+\[
+g(\theta,a)=a(\cos\theta,\sin\theta),\qquad a>0,
+\]
+adds a gain variable and produces a two-dimensional annular family over a bounded gain range. A faithful one-variable encoding is therefore a substantive hypothesis, not a definition of representation.
+
+\subsection{Stronger validation and suitable wording}
+A useful extension would combine an independently fitted ring with controlled transverse and tangential perturbations, estimate the resulting relaxation, and test whether a behavior-driven model with the same observation noise explains it. Perturbations of candidate upstream inputs can help localize the restoring mechanism. The suitable conclusion is that circular organization and directed return jointly support a continuous-attractor account in the studied regime. Exact connectivity and the boundary of the causal system require further identification.
+
+\begin{insight}{What would be an unfair criticism?}
+Saying that this study inferred attraction solely from a low-dimensional picture would misstate its analysis. The scientifically useful question is whether its dynamical evidence distinguishes the particular alternative one has in mind.
+\end{insight}
+
+\section{Grid cells: toroidal topology and continuous-attractor models}
+\subsection{Study finding}
+\citet{app_gardner2022} used simultaneous grid-cell recordings, dimensionality reduction, and topological analysis to identify toroidal organization within modules. Decoded toroidal coordinates related to spatial firing, and population organization persisted across environments and behavioral states. These observations were compared with predictions of continuous-attractor models.
+
+\subsection{Inference audit}
+A two-dimensional periodic phase has state space
+\[
+T^2=S^1\times S^1
+=\R^2/\Lambda,
+\]
+where \(\Lambda\) is a lattice of spatial phase periods. Opposite sides of a fundamental parallelogram represent the same phase. A torus therefore makes a specific global prediction absent from a generic two-dimensional PCA projection. Its homology over a field has \(\beta_0=1\), \(\beta_1=2\), and \(\beta_2=1\).
+
+This prediction does not mean that a single animal's physical environment is itself a torus. Physical location can map many-to-one to a module's periodic phase. Conversely, a population image with toroidal topology does not specify how the phase is generated. A feedforward map of two periodic input coordinates and a recurrent path integrator can have the same activity image while differing in dynamics.
+
+The cross-condition observations matter because they constrain versions of the feedforward account that depend narrowly on current external sensory conditions. They do not exhaust every possible feedforward or distributed recurrent model. One should ask which alternative models are actually compared and which quantities remain invariant. A phrase such as \emph{toroidal structure supports the continuous-attractor hypothesis} is more informative when accompanied by the invariances and model predictions that supply that support.
+
+Topology alone also leaves metric freedom. A torus can be stretched without changing its homeomorphism type, while its geodesic lengths, curvature, and embedding distances change. A toroidal coordinate may therefore require calibration before being interpreted as a uniformly scaled physical displacement. Homology detects independent loops; it does not set the velocity gain of a path integrator.
+
+\subsection{A model-comparison extension}
+Train two matched observation models: one with a latent phase updated by velocity input, and one driven by a behavior-based encoding map. Match tuning, noise, and sampling on training data. Then compare predictions during a sensory change, an interval with mismatched movement and cues, or a controlled neural perturbation. The goal is not to make a simpler model fail by withholding an input it plausibly receives, but to state the input assumptions clearly enough that a prediction can be falsified.
+
+\section{Motor learning: an operational manifold can be experimentally useful}
+\subsection{Study finding and a later extension}
+\citet{app_sadtler2014} used a brain-computer interface to compare learning of mappings that reorganized activity within an estimated intrinsic manifold with mappings requiring activity outside it. Learning was easier for the within-manifold mappings over the tested timescale. \citet{ev_oby2019} subsequently showed that longer training could produce new neural activity patterns, qualifying an interpretation of the original constraint as permanently fixed.
+
+\subsection{Inference audit}
+Here the central geometric object is an estimated low-dimensional activity subspace. A linear subspace is itself a smooth manifold, so the terminology need not be mathematically abusive. More importantly, the analysis operationalizes that object in a controlled perturbation of the neural-to-cursor mapping. Its scientific value does not require a claim about nonlinear curvature or a global topology.
+
+To see the logic, write a baseline population response as
+\[
+y=\mu+Wz+\varepsilon,\qquad W\in\R^{p\times k}.
+\]
+The column space of \(W\) is the estimated repertoire. A cursor decoder \(v=Ay\) can be changed in ways that preserve accessible population combinations or require different combinations. If these classes differ in learnability, the observed baseline geometry predicts a behaviorally meaningful constraint.
+
+Several qualifications follow from the setup. First, an estimated factor subspace depends on the sampled task and neurons. Second, learning difficulty can depend on decoder gain, required effort, feedback, reward, and initial performance. These quantities should be matched or modeled when extending the comparison. Third, a short-timescale constraint need not be a permanent inability: synaptic changes, exploration, and recruitment of previously weak directions may expand the repertoire.
+
+The later learning result is therefore a productive refinement. It invites a dynamical description in which the fast state \(x\) evolves within a repertoire determined by slowly changing parameters \(\theta\):
+\[
+\dot x=f(x;\theta),\qquad
+\dot\theta=\epsilon\,G(x,\theta),\qquad 0<\epsilon\ll1.
+\]
+The fast geometry can constrain immediate performance while slow learning changes it. This two-timescale interpretation is a model proposed here; it is not a theorem extracted from either experiment.
+
+\subsection{Suitable wording}
+A justified formulation is that baseline population structure predicts the difficulty of specified learning problems over specified timescales. An overinterpretation would be that the full motor cortex is confined forever to an exact fixed subspace. The latter does not follow from the operational experiment and should not be attributed to its authors.
+
+\section{Motor rotations: a real structure does not locate all recurrence}
+\subsection{Study findings}
+\citet{app_churchland2012} found coordinated rotational components in motor cortical population activity during reaching and related them to a dynamical view of movement generation. \citet{ev_elsayed2017} tested population structure against surrogates preserving selected simpler features; their motor-dynamics result was not explained by those tested features. This methodological study should not be cited as a blanket refutation of neural rotations.
+
+\citet{ev_kalidindi2021} demonstrated rotational structure in trained feedback-control models, including models without intrinsic recurrent connections in the controller, and compared related neural recordings. \citet{ev_sabatini2024} later described reach-dependent rotational planes, refining the approximation of a common rotational structure. These results address different questions: whether rotations are structured, how they are generated, and how their geometry varies.
+
+\subsection{Inference audit: three questions}
+\paragraph{Is there coordinated rotation?}
+For a low-dimensional state \(z\), the fit
+\[
+\dot z\approx Mz,\qquad M^\top=-M
+\]
+tests a rotational component in a particular coordinate system and epoch. A nonzero skew-symmetric fit is not sufficient by itself: almost any finite dataset permits some fit. Predictive performance and comparison with appropriate surrogates determine whether the observed structure exceeds the chosen alternative.
+
+\paragraph{Does rotation imply a stable limit cycle?}
+No. A purely skew-symmetric linear system preserves \(\norm z\). It has no radial contraction. A finite curved transient can also show a strong rotational component without completing a periodic orbit. Calling a reaching trajectory a limit cycle therefore requires more than a jPCA plane. This is a mathematical distinction, not a claim that the original study asserted a stable limit cycle.
+
+\paragraph{Where is the feedback loop?}
+Suppose a controller has no internal recurrence but acts on a plant:
+\[
+u_t=K y_t,\qquad x_{t+1}=A x_t+B u_t,\qquad y_t=Cx_t.
+\]
+The closed-loop state obeys \(x_{t+1}=(A+BKC)x_t\). Complex eigenvalues of \(A+BKC\) can yield rotational behavior even though the controller itself is an instantaneous map. This elementary construction explains why a pattern in one recorded region does not uniquely localize its dynamical source. The relevant state may include the body, sensory feedback, and other brain areas.
+
+\subsection{Stronger validation}
+Compare models with matched inputs and feedback, test predictions after sensory delays or perturbations, and evaluate how rotational modes change across operating points. Analyze general linear dynamics alongside the skew-symmetric restriction; report variance or predictive error outside the selected planes. When planes vary by condition, evaluate a model that predicts that variation on held-out conditions instead of aligning every condition independently and then declaring universal dynamics.
+
+\begin{insight}{An instructive use of later literature}
+The progression from identifying rotations to testing their null explanation, distributed source, and condition dependence is an example of accumulating mechanistic precision. It is not accurately summarized as either complete proof of autonomous cortical dynamics or proof that the original structure was an artifact.
+\end{insight}
+
+\section{Across-session alignment: stability modulo a transformation}
+\subsection{Study finding}
+\citet{app_gallego2020} aligned low-dimensional cortical activity across recording sessions and demonstrated stable latent relationships useful for behavioral decoding despite changes in recorded neurons. The study distinguishes the stability of population-level organization from the stability of individual measurement channels.
+
+\subsection{Inference audit}
+An alignment result is a statement about equivalence under an allowed transformation. If \(Z_1,Z_2\in\R^{n\times k}\) are trajectories, orthogonal Procrustes alignment fits
+\[
+\min_{Q^\top Q=I}\norm{Z_1Q-Z_2}_F^2.
+\]
+This transformation preserves Euclidean distances. A general invertible linear map preserves linear dimension but may distort distances and angles. A highly flexible nonlinear alignment may match unrelated finite datasets. Therefore the allowed transformation is part of the hypothesis, not a merely cosmetic preprocessing choice.
+
+There is also an elementary identifiability issue. For an unconstrained latent factorization, \(Wz=(WQ)(Q^{-1}z)\) for invertible \(Q\). In factor analysis with a fixed standard-normal latent prior, this freedom is restricted to orthogonal transformations unless the latent covariance is transformed as well. A change in the estimated coordinates may reflect this freedom rather than a change in computation. Conversely, good alignment does not prove unchanged synaptic connectivity or a unique internal code.
+
+The strongest use of alignment learns a transformation on one subset and predicts another: new trials, conditions, time periods, or behavioral outputs. The independent test limits the ability of alignment to manufacture similarity. The appropriate uncertainty unit must match the claim; many time bins from one session do not substitute for independent animals.
+
+\subsection{Suitable wording}
+Stable latent organization under a specified alignment is a precise and useful conclusion. It differs from Lyapunov stability, which concerns response to state perturbations under a dynamical law, and from structural stability, which concerns perturbations of that law. The word \emph{stable} is not wrong here, but its intended meaning should be stated.
+
+\section{RNN fixed points: access to equations changes the evidential standard}
+\subsection{Study finding}
+\citet{app_sussillo2013} developed an optimization-based analysis of fixed and slow points in trained recurrent networks and used local linearization to explain computations. Their framework makes stable and unstable states, and slow regions between them, accessible to direct numerical investigation.
+
+\subsection{Inference audit}
+For a fully specified continuous network, define
+\[
+q(x)=\frac12\norm{f(x;u)}^2
+\]
+at a fixed input \(u\). A point with \(q=0\) is an equilibrium. A numerical minimum with small positive \(q\) is only an approximate equilibrium or a slow point. Indeed,
+\[
+\nabla q(x)=Df(x;u)^\top f(x;u)
+\]
+can vanish even if \(f(x;u)\ne0\). For example, \(f(x)=1+x^2\) gives \(q'(0)=0\) while the speed is one. Reporting the residual is therefore essential.
+
+For a discrete RNN, use \(f\) only if it denotes a true vector field. The fixed-point residual is instead \(F(x;u)-x\), and the local stability criterion concerns eigenvalues of \(D_xF\) inside the unit circle. Applying the continuous-time negative-real-part criterion to a discrete recurrence is an error, not an operational convention.
+
+Known equations permit stronger tests than passive neural recordings: one can verify Jacobians with finite differences or automatic differentiation, simulate displacements in selected eigen-directions, change an input while holding the state fixed, and perturb candidate modes. These tests still have limits. Root finding is local and may miss equilibria; linearization has a finite neighborhood of validity; a fitted model need not be the biological circuit; and an RNN state projection may hide variables. An LSTM analysis in particular must include its cell state as well as its visible hidden state.
+
+\subsection{From description to a computational mechanism}
+A mechanism becomes persuasive when identified structures predict task-relevant behavior. If two stable states store a bit, a pulse should switch their basins in a predictable direction. If a slow direction integrates evidence, perturbing along it should change the stored quantity systematically, while a matched transverse perturbation should relax. An ablation that simply destroys all computation is less specific than these graded predictions.
+
+Training several random initializations helps assess whether a mechanism is reproducible across trained solutions or specific to one run. Recurrence across seeds does not establish that the task mathematically requires that mechanism. Similar input-output performance does not imply identical state-space geometry. Comparisons should state whether they concern one trained model, a family of solutions, or a proposed biological computation.
+
+\section{Comparative evidence table}
+Table~\ref{tab:13-papers} gives a compact reading guide. Its limitations are this textbook's inferential assessments, except where a later paper is explicitly identified.
+
+{\scriptsize\setlength{\tabcolsep}{2pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{.14\linewidth}>{\raggedright\arraybackslash}p{.16\linewidth}>{\raggedright\arraybackslash}p{.16\linewidth}>{\raggedright\arraybackslash}p{.18\linewidth}>{\raggedright\arraybackslash}p{.15\linewidth}>{\raggedright\arraybackslash}p{.13\linewidth}}
+\caption{Representative papers and the scope of their evidence.}\label{tab:13-papers}\\
+\toprule
+Paper & Scientific question & Mathematical methods & Main finding & Evidential strength & Main inference limit\\
+\midrule\endfirsthead
+\toprule
+Paper & Scientific question & Mathematical methods & Main finding & Evidential strength & Main inference limit\\
+\midrule\endhead
+\bottomrule\endfoot
+Chaudhuri et al.\ (2019) & Internal organization of head direction & Manifold fitting, topology, flux & Ring and return dynamics & Geometry plus dynamics across states & Circuit source is incompletely observed\\
+Gardner et al.\ (2022) & Grid-module organization & Topology and circular coordinates & Toroidal population organization & Multiple predictions of a periodic code & Topology alone does not fix mechanism or metric\\
+Sadtler et al.\ (2014) & Geometry and learnability & Latent subspace; decoder perturbations & Easier within-repertoire learning & Controlled behavioral manipulation & Regime and timescale matter\\
+Oby et al.\ (2019) & Longer-term repertoire changes & Population-pattern analysis & New activity patterns after learning & Tests temporal scope of constraints & No unique synaptic explanation\\
+Churchland et al.\ (2012) & Structure during reaching & PCA and rotational fit & Coordinated rotations & Population structure tied to computation & Rotations alone do not locate recurrence\\
+Elsayed and Cunningham (2017) & Novelty beyond simpler features & Structured population surrogates & Conditional tests of structure & Explicit alternative hypotheses & Rejection is relative to preserved features\\
+Kalidindi et al.\ (2021) & Can feedback yield rotations? & Trained feedback models; population analysis & A distributed source is possible & Constructive mechanistic alternative & Possibility does not establish exclusive source in vivo\\
+Sabatini and Kaufman (2024) & Are rotation planes fixed? & Condition-dependent dynamical modeling & Reach-dependent planes & Refines a restricted dynamical model & Generalization outside sampled reaches remains a question\\
+Gallego et al.\ (2020) & Stable organization across days & Latent alignment; decoding & Stable aligned latent relationships & Prediction across changing measurements & Alignment equivalence is not identical circuitry\\
+Sussillo and Barak (2013) & How do trained RNNs compute? & Fixed/slow points; Jacobians & Interpretable dynamical structures & Direct access to model equations & Model analysis does not identify biology by itself\\
+\end{longtable}}
+
+\section{Writing a fair critical paragraph}
+A useful critical paragraph follows a simple sequence: state the contribution, identify the mathematical bridge, explain the evidence for that bridge, then state the remaining ambiguity. For example:
+\begin{quote}
+The analysis provides evidence for circular organization of the measured population and for return dynamics around the fitted set. The continuous-attractor interpretation additionally assumes that the observed coordinates capture the relevant state and that the estimated return is not explained by measurement noise or coordinated input. Testing perturbation responses in a fitted observation model would help distinguish these possibilities.
+\end{quote}
+This paragraph is an illustrative synthesis, not a quotation from a paper. It names a real inferential gap without declaring the study wrong. A critical review becomes less useful when it treats every approximation as a misuse or turns a well-specified operational definition into a claim the authors never made.
+
+\section*{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} Choose one row of Table~\ref{tab:13-papers}. Identify its mathematical object, observable data, and strongest directly supported conclusion.
+\item \textbf{Introductory.} Explain why a linear factor subspace can legitimately be called a manifold. Which additional claims would require extra analysis?
+\item \textbf{Intermediate.} Construct a feedforward tuning model that produces a ring without recurrent dynamics. Then add one observable that would help distinguish it from a recurrent model.
+\item \textbf{Intermediate.} Derive the closed-loop matrix \(A+BKC\) and give a two-dimensional example with complex eigenvalues although the controller has no internal state.
+\item \textbf{Intermediate.} Explain why a minimum of squared speed need not be a fixed point. Give an example distinct from \(f(x)=1+x^2\).
+\item \textbf{Advanced.} Design a held-out test for across-session alignment that separates coordinate freedom from a genuinely preserved dynamical relationship.
+\item \textbf{Advanced.} Read one of the primary papers and write a six-part audit using Section~\ref{sec:12-framework}. Mark clearly which limitations the authors acknowledge, which are later findings, and which are your own proposed alternatives.
+\end{enumerate}
+
+\section*{Chapter summary}
+Good mathematical criticism preserves the actual scientific contribution. Head-direction and grid-cell studies combine several sources of evidence; a motor-learning manifold is an experimentally useful operational object; rotations can be real while their causal source remains distributed; and direct access to an RNN permits mechanistic tests that biological recordings alone cannot supply. Precision comes from matching each conclusion to its definition, observations, and tested alternatives.
+
+\section*{Further reading}
+For an empirical sequence, read \citet{app_churchland2012}, then \citet{ev_elsayed2017}, \citet{ev_kalidindi2021}, and \citet{ev_sabatini2024}. For geometry as a learning constraint, compare \citet{app_sadtler2014} with \citet{ev_oby2019}. For topology and dynamics, compare \citet{app_chaudhuri2019} and \citet{app_gardner2022} using the same six-part audit rather than treating the word \emph{manifold} as a single claim.

@@ -1,0 +1,166 @@
+\chapter{Dimensionality Reduction in Neural Population Analysis}\label{ch:06}
+
+\begin{insight}{Learning objectives}
+Construct an activity matrix without losing its trial structure; distinguish variability of condition means from variability on individual trials; derive the observation models of probabilistic PCA, factor analysis, and GPFA; understand what dPCA and jPCA optimize; and choose a validation scheme that answers a specified scientific question.
+\end{insight}
+
+\section{What is an observation?}
+Suppose we record fifty neurons while an animal reaches in several directions. Is the population two-dimensional because its first two principal components form smooth trajectories? Before calculating a dimension, we must say what varies across observations. A matrix of condition means, a matrix of all individual time bins, and a matrix of trial-to-trial residuals answer different questions.
+
+Let $s_{ir}(t)$ be the spike train of neuron $i$ on trial $r$, represented as a sum of point events. With bin width $\Delta>0$, define
+\begin{equation}
+ N_{irb}=\int_{b\Delta}^{(b+1)\Delta}s_{ir}(t)\,\mathrm dt,
+ \qquad y_{irb}=N_{irb}/\Delta.\label{eq:06-counts}
+\end{equation}
+$N_{irb}$ is a dimensionless count; $y_{irb}$ has units of spikes per unit time. A population observation is the vector $\mathbf y_{rb}=(y_{1rb},\ldots,y_{prb})^\top\in\R^p$. Stacking its transpose as a row produces $X\in\R^{n\times p}$. The row index is an index of observations, not automatically an index of independent samples. Keep accompanying trial, condition, time, animal, and session identifiers.
+
+A trial average for condition $c$ is $\bar{\mathbf y}_{cb}=R_c^{-1}\sum_{r:c(r)=c}\mathbf y_{rb}$. Under independent zero-mean trial noise with covariance $\Sigma_\epsilon$, averaging reduces its covariance to $\Sigma_\epsilon/R_c$. Consequently, a smooth low-rank average can coexist with complicated or highly variable single-trial activity. Conversely, variable timing can wash out coherent single-trial trajectories. Trial averaging is an estimator of a conditional mean, not a neutral compression of the original process.
+
+\begin{example}[A rank-one average with many noisy dimensions]
+Let $\mathbf y_r(t)=a\sin t+\epsilon_r(t)$, with fixed $a\in\R^p$ and independent isotropic noise of covariance $\sigma^2 I$. The signal covariance has rank one. The full observation covariance is $\Var(\sin t)aa^\top+\sigma^2I$, which has rank $p$ when $\sigma>0$. As the number of averaged trials grows, the condition mean approaches a line. Neither the mathematical rank of the noisy matrix nor the rank of the mean alone estimates the number of dynamical state variables.
+\end{example}
+
+\section{Preprocessing changes the question}
+Binning controls temporal resolution and count variance. Smoothing replaces $y_i(t)$ by $\tilde y_i(t)=\int K_h(t-s)y_i(s)\,\mathrm ds$, where the kernel $K_h$ integrates to one and $h$ is its temporal width. This suppresses fast variation and creates temporal dependence. A symmetric kernel uses future observations: useful for retrospective visualization, but unsuitable for claiming online prediction without an explicit latency allowance. Never smooth across a train--test boundary or a trial boundary and then call the resulting split independent.
+
+Centering removes a mean. Which mean matters. Subtracting each neuron's overall mean retains condition differences; subtracting each condition's time-dependent mean isolates residual fluctuations. These operations estimate different covariances. Standardizing neuron $i$ by its training-set standard deviation changes Euclidean squared distance to
+\begin{equation}
+ d^2(\mathbf y,\mathbf y')=\sum_{i=1}^p
+       \frac{(y_i-y_i')^2}{\hat\sigma_i^2}.
+\end{equation}
+It therefore weights low-variance neurons more heavily and may amplify nearly silent, noisy cells. Choosing a small variance floor makes that choice explicit. Square-root transformations can reduce the mean dependence of Poisson-like count variance, but they do not make arbitrary counts exactly Gaussian.
+
+Alignment to stimulus onset, movement onset, or a decoded event determines which timing variation remains. Time warping can make trajectories agree by construction. Calcium fluorescence adds indicator kinetics and an observation filter: a slow trajectory in fluorescence is not automatically a slow neural state. Fit the complete preprocessing transformation on training data, carry it unchanged into validation, and report its units and scale.
+
+\begin{insight}{Three distinct claims}
+A small number of components may explain \emph{total recorded variance}, \emph{reliable condition-dependent variance}, or \emph{shared variance after private observation noise is modeled}. These are different estimands. State which denominator appears in any ``variance explained'' percentage.
+\end{insight}
+
+\section{PCA, probabilistic PCA, and factor analysis}
+PCA solves the deterministic reconstruction problem of Chapter~\ref{ch:01}. It has no intrinsic separation of signal and noise. A latent observation model makes that separation a modeling assumption:
+\begin{equation}
+ \mathbf y=\mu+Lz+\epsilon,\qquad
+ z\sim\mathcal N(0,I_k),\quad
+ \epsilon\sim\mathcal N(0,\Psi),\quad z\perp\epsilon.
+ \label{eq:06-fa}
+\end{equation}
+Here $L\in\R^{p\times k}$ is a loading matrix, $z\in\R^k$ a latent coordinate, and $\Psi$ an observation-noise covariance. Marginalizing $z$ gives $\mathbf y\sim\mathcal N(\mu,LL^\top+\Psi)$ because covariance adds for independent random vectors.
+
+In probabilistic PCA (PPCA), $\Psi=\sigma^2I_p$. In factor analysis (FA), $\Psi=\diag(\psi_1,\ldots,\psi_p)$ with positive diagonal entries. Thus FA allows neurons to have different private noise variances while attributing correlations to $Lz$. Under the independent-observation version of this model, the Gaussian likelihood for centered observations $Y_j=\mathbf y_j-\mu$ is, up to a constant,
+\begin{equation}
+ \ell(L,\Psi)=-\frac n2\log\det C_y
+              -\frac12\sum_{j=1}^nY_j^\top C_y^{-1}Y_j,
+ \qquad C_y=LL^\top+\Psi.\label{eq:06-fa-likelihood}
+\end{equation}
+The determinant term penalizes excessive covariance volume, while the quadratic term penalizes observations lying in low-probability directions. This balance is absent from raw reconstruction error.
+
+For PPCA, maximum likelihood recovers the leading principal subspace under the model; with the maximum-likelihood sample covariance $n^{-1}X_c^\top X_c$, the optimum noise variance is the average of the discarded eigenvalues when $k<p$ and the regular nondegenerate solution exists. The convention differs by a factor $(n-1)/n$ from the unbiased covariance used elsewhere in this book. The latent posterior follows by completing the square:
+\begin{align}
+ \Sigma_{z\mid y}&=(I_k+L^\top\Psi^{-1}L)^{-1},\\
+ \E[z\mid\mathbf y]&=\Sigma_{z\mid y}L^\top\Psi^{-1}(\mathbf y-\mu).
+ \label{eq:06-posterior}
+\end{align}
+The prior contributes $I_k$ to posterior precision; the likelihood contributes $L^\top\Psi^{-1}L$. This derivation also explains shrinkage of uncertain latent estimates. PPCA is a probabilistic formulation, not evidence that neural variability is isotropic Gaussian noise \citep{app_tipping1999}.
+
+\begin{example}[Shared versus private variability]
+Let $p=3$, $k=1$, $L=(1,1,0)^\top$, and $\Psi=\diag(0.1,0.1,10)$. Then
+\[
+ C_y=\begin{pmatrix}1.1&1&0\\1&1.1&0\\0&0&10\end{pmatrix}.
+\]
+PCA's largest eigenvalue is $10$, belonging to neuron three alone. The shared latent factor is along $(1,1,0)$ and has signal variance $2$ in that unit direction. If the scientific question is coordinated fluctuations, the leading PC answers a different question from the FA loading. The private-noise interpretation is nevertheless conditional on the FA model; correlated measurement artifacts could violate it.
+\end{example}
+
+Latent axes are not unique. For any orthogonal $Q$, replacing $L$ by $LQ$ and $z$ by $Q^\top z$ leaves $Lz$ and the standard-normal prior unchanged. A loading labeled ``decision'' because it correlates with choice is a coordinate-dependent description unless further constraints identify that axis. The span, predictions, and appropriate rotation-invariant quantities often have a stronger interpretation than individual latent coordinates.
+
+\section{Adding time: GPFA and state-space models}
+A sequence of separately fitted FA coordinates is not a dynamical model. Gaussian-process factor analysis instead gives each latent coordinate a joint temporal Gaussian prior. A simple specification is
+\begin{equation}
+ z_a(t)\sim\mathcal{GP}(0,K_a),\qquad
+ K_a(t,t')=v_a\exp\!\left[-\frac{(t-t')^2}{2\ell_a^2}\right],
+ \qquad \mathbf y(t)\mid z(t)\sim\mathcal N(\mu+Lz(t),\Psi).
+ \label{eq:06-gpfa}
+\end{equation}
+The index $a=1,\ldots,k$ labels latent coordinates, $v_a$ is variance, and $\ell_a$ is a timescale in the same units as $t$. For finitely many observation times, this means a multivariate Gaussian with entries $K_a(t_b,t_{b'})$. Posterior inference combines all times, so it performs smoothing and dimensionality reduction together. The covariance kernel expresses temporal regularity; it does not by itself specify a local autonomous vector field $\dot z=f(z)$. GPFA was developed for single-trial population trajectories and evaluated using predictive criteria \citep{app_yu2009}.
+
+Compare the linear Gaussian state-space model
+\begin{equation}
+ z_{t+1}=Az_t+Bu_t+\eta_t,\qquad
+ \mathbf y_t=\mu+Lz_t+\epsilon_t,\qquad
+ \eta_t\sim\mathcal N(0,Q),\quad\epsilon_t\sim\mathcal N(0,\Psi).
+ \label{eq:06-lds}
+\end{equation}
+Here $A$ explicitly models temporal transitions, $B$ models measured input, and $Q$ models unexplained process variation. Filtering estimates $z_t$ from observations up to $t$; smoothing estimates it using both earlier and later observations. These are different available-information assumptions. A Poisson observation alternative is $N_{it}\mid z_t\sim\operatorname{Poisson}(\Delta\exp(\mu_i+l_i^\top z_t))$, retaining count units and nonnegative rates at the cost of non-Gaussian inference.
+
+Even an excellent state-space fit need not identify unique physiological states. Under invertible $S$, the transformed state $\tilde z=Sz$ has $\tilde A=SAS^{-1}$ and $\tilde L=LS^{-1}$ and produces the same outputs after transforming the remaining parameters. The dynamical eigenvalues survive this linear coordinate change; individual latent axes do not. More serious ambiguity arises when unobserved inputs can substitute for latent recurrence.
+
+\section{Task structure: demixed PCA}
+Suppose the condition mean depends on stimulus $s$, decision $c$, and time $t$. One can decompose a balanced data tensor into a grand mean, stimulus contribution, decision contribution, temporal contribution, and interactions. For example,
+\[
+ m_{sct}=m_0+m_s+m_c+m_t+m_{sc}+m_{st}+m_{ct}+m_{sct}^{\rm int}.
+\]
+Each term is defined by averaging over other factors and subtracting lower-order terms, using a specified weighting of conditions. Unequal occupancy changes those averages unless corrected. This is an analysis-of-variance decomposition of means, not a causal decomposition of computation.
+
+Demixed PCA seeks low-dimensional linear reconstructions of such marginalizations \citep{app_kobak2016}. To make matrix orientations explicit, let $Y=X^\top\in\R^{p\times m}$ contain flattened condition means as columns, and let $Y_\alpha$ be one marginalization. A representative regularized objective is
+\begin{equation}
+ \min_{\substack{F_\alpha,D_\alpha\\F_\alpha^\top F_\alpha=I}}
+ \norm{Y_\alpha-F_\alpha D_\alpha Y}_F^2
+ +\lambda\norm{D_\alpha}_F^2.\label{eq:06-dpca}
+\end{equation}
+Here $F_\alpha\in\R^{p\times k_\alpha}$ and $D_\alpha\in\R^{k_\alpha\times p}$. The encoder orthonormality constraint fixes a scale ambiguity that would otherwise make a decoder-only penalty ineffective. The decoder $D_\alpha$ extracts coordinates from the full activity, and the encoder $F_\alpha$ reconstructs the chosen task-dependent part. Regularization and component numbers require held-out selection. Distinct marginalizations need not correspond to orthogonal neural subspaces. An axis that separates stimulus from decision statistically is not a neuron population devoted exclusively to stimulus or decision, especially when task variables are correlated.
+
+\section{Rotational structure: jPCA}
+Imagine two latent signals $z_1(t)=\cos\omega t$ and $z_2(t)=\sin\omega t$. They satisfy
+\[
+ \dot z=Mz,\qquad
+ M=\begin{pmatrix}0&-\omega\\\omega&0\end{pmatrix},\qquad M^\top=-M.
+\]
+More generally, a real skew-symmetric matrix generates rotations. Indeed,
+$\mathrm d\norm{z}^2/\mathrm dt=2z^\top Mz=0$, because the scalar equals its own negative. jPCA fits the rotational component of neural trajectories by least squares under a skew-symmetry constraint, typically after reducing dimensionality:
+\begin{equation}
+ \hat M=\argmin_{M^\top=-M}\norm{\dot Z-ZM^\top}_F^2,
+ \quad Z\in\R^{n\times k}.\label{eq:06-jpca}
+\end{equation}
+The fitted plane is useful when its held-out derivative prediction exceeds relevant controls. Motor-cortex reaching activity provided an influential application \citep{app_churchland2012}.
+
+A skew-symmetric fit is intentionally restricted. It has no radial attraction, no damping, and no noise. A real damped oscillator has an additional negative symmetric component. A brief rotational trajectory also need not be a periodic orbit: periodicity concerns repeated return under a dynamical law, whereas rotation in a projection is a geometric property of a finite segment. Smooth condition-specific responses driven by a common event can generate curved trajectories. Chapter~\ref{ch:13} examines why null models preserving temporal and condition structure are important for interpreting these fits.
+
+\section{Cross-validation that matches the scientific claim}
+\label{sec:06-validation}
+The dimension minimizing ordinary PCA test reconstruction error is not, in general, a meaningful optimum: adding orthogonal components cannot increase the reconstruction error of any vector when the fitted subspaces are nested. Held-out data protect against some fitting bias, but do not remove this monotonicity. A likelihood criterion, an explicit complexity penalty, a noise estimate, or a prediction task with genuinely hidden entries is needed.
+
+For example, fit a latent model using training trials, then predict neuron $i$ on a new trial using the other neurons and the learned model:
+\begin{equation}
+ \widehat y_i=\E[y_i\mid\mathbf y_{-i},\widehat\theta_{\rm train}],
+ \qquad
+ \mathrm{MSE}_i=\frac1{n_{\rm test}}\sum_j(y_{ji}-\widehat y_{ji})^2.
+\end{equation}
+The target neuron's test value must not enter latent inference. For Gaussian models, the conditional prediction follows directly from the covariance partition:
+$\widehat y_i=\mu_i+C_{i,-i}C_{-i,-i}^{-1}(\mathbf y_{-i}-\mu_{-i})$.
+Compare dimensions by held-out predictive density or error, including uncertainty across independent trials or animals. Repeated random time-bin splits can grossly overstate independence after smoothing. Use blocked splits, trial splits, and session splits according to the intended generalization.
+
+For repeated stimuli, independent repeat groups also permit cross-covariance estimates of reliable stimulus-related variance. If the two groups have independent zero-mean noise, the expected cross-product removes the noise contribution, unlike a same-repeat covariance. Negative estimated components can occur from finite-sample error. Work on visual-cortex eigenspectra illustrates that reliable representations may span many dimensions, depending on the stimulus ensemble \citep{app_stringer2019}; low-dimensionality is a hypothesis about a specified scale and dataset, not a universal property of cortex.
+
+\begin{insight}{A practical evidence chain}
+\textbf{Object:} a $k$-dimensional latent observation model. \textbf{Hypothesis:} trial variability has shared structure relevant to behavior. \textbf{Data:} simultaneous recordings with repeated trials. \textbf{Method:} fit FA or a temporal latent model on training trials. \textbf{Evidence:} held-out neuron prediction and behavior prediction improve over matched baselines. \textbf{Alternatives:} shared sensory drive, movement, or recording artifacts. \textbf{Limit:} prediction supports a useful shared representation; physiological recurrence requires additional evidence.
+\end{insight}
+
+\section{Examples across systems and common mistakes}
+In motor experiments, condition means and single-trial trajectories may both be informative, but they should be reported separately. In sensory experiments, stimulus complexity and stimulus sampling change the explored representation. In hippocampal recordings, position, speed, theta phase, direction, and task history can jointly determine activity; flattening them into one ``spatial manifold'' can conceal branching or additional dimensions. Unsupervised representations can help discover variables worth testing; subsequent association with measured behavior provides an independent interpretation when that behavior was not used to choose the embedding \citep{app_rubin2019}.
+
+Nonlinear embeddings can expose neighborhood structure that linear methods miss, but their axes, gaps, and apparent density do not automatically inherit physical meaning. Check the representation in the original feature-space metric and test stability across preprocessing and hyperparameters. A clear plot is an exploratory result. A held-out predictive or geometric criterion turns it into a specified empirical claim.
+
+\begin{misconception}
+``The first latent component encodes the task variable.'' A component may correlate with the variable because of occupancy, a common cause, or the chosen coordinate rotation. Report what information can be decoded, from which data split, relative to which controls; then ask whether interventions support a functional role.
+\end{misconception}
+
+\section{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} In the rank-one example, compute all $p$ covariance eigenvalues when $\norm a=2$ and $t$ is uniform over a period. How do they change after averaging $R$ independent trials?
+\item \textbf{Introductory.} Derive the conditional mean in Equation~\eqref{eq:06-posterior} by collecting quadratic and linear terms in $z$.
+\item \textbf{Intermediate.} Prove that reconstruction error for a fixed test vector decreases when one adds an orthogonal PCA axis. Explain why this does not guarantee improved prediction of an unobserved neuron.
+\item \textbf{Intermediate.} Simulate a shared stimulus drive plus independent private noise. Compare PCA and FA before and after multiplying one neuron's noise by ten. State which metric changes.
+\item \textbf{Advanced.} Construct a feedforward, time-dependent observation model with rotating condition means. Design a held-out comparison that distinguishes it from autonomous recurrence without allowing either model to access future data.
+\end{enumerate}
+
+\section{Summary and further reading}
+An activity matrix is an estimator and a choice of sampling unit. PCA summarizes total covariance; PPCA and FA separate latent and private variation under explicit observation assumptions; GPFA adds a temporal prior; dPCA uses task labels; and jPCA targets rotational derivative structure. None substitutes for a correctly split predictive evaluation or a mechanistic experiment. Read \citet{app_tipping1999} for the probabilistic PCA derivation, \citet{app_yu2009} for GPFA, and \citet{app_kobak2016} for task marginalizations. Chapter~\ref{ch:11} implements complementary synthetic examples.

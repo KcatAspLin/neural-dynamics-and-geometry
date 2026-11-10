@@ -1,0 +1,148 @@
+\chapter{Neural Manifolds and Representation Geometry}\label{ch:08}
+
+\begin{insight}{Learning objectives}
+Separate a neural tuning map from its sampled point cloud; check the conditions under which a represented variable gives an embedded manifold; distinguish topology, Euclidean geometry, and statistical discriminability; understand alignment across sessions; and recognize what remains untested when a study reports a ``neural manifold.''
+\end{insight}
+
+\section{Which object is called the manifold?}
+Suppose head angle $\theta$ changes continuously and every neuron's mean firing rate is a smooth function of it. The population mean is a map $g:S^1\to\R^p$. The mathematical question is whether its image is a smooth copy of the circle. The experimental question is whether noisy measurements adequately support that model. These are related questions, but neither is answered by declaring a two-dimensional plot to be a ring.
+
+A useful generative description is
+\begin{equation}
+ z\in M,\qquad \mathbf y=g(z)+\epsilon,\qquad
+ g:M\longrightarrow\R^p.\label{eq:08-observation}
+\end{equation}
+$M$ is a latent state manifold of dimension $d$; $g$ maps a state to a mean observation; $\epsilon$ represents observation variability or model mismatch. The finite point cloud $\{\mathbf y_j\}_{j=1}^n$ is not itself the smooth manifold $M$, and it generally does not lie exactly on $g(M)$. With continuous full-dimensional observation noise, the distribution can have full-dimensional support even when its mean structure is low-dimensional.
+
+An operational neural manifold often means a fitted linear subspace, a nonlinear latent representation, or a reproducible set of activity patterns. Those uses can be scientifically useful. They should be accompanied by the object's definition. A subspace is itself a smooth manifold, but its use does not demonstrate curved geometry or nontrivial topology. The neural-manifold perspective in motor control frequently concerns correlated activity modes and their low-dimensional span \citep{app_gallego2017}.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabularx}{\linewidth}{p{.20\linewidth}XX}
+\toprule
+Object & Mathematical statement & What a fitted representation supplies \\
+\midrule
+Linear subspace & A set closed under addition and scalar multiplication, with dimension $k$ & A rank-$k$ approximation and reconstruction errors \\
+Smooth manifold & Locally Euclidean space with compatible smooth charts & A model whose local regularity must be assessed, not a property certified by the plot \\
+Embedded manifold & A smooth injective immersion that is a homeomorphism onto its image & A proposed observation map; collisions and rank loss remain empirical concerns \\
+Attracting manifold & Invariance plus attraction of nearby trajectories under a specified law & Requires temporal and perturbational evidence beyond shape \\
+\bottomrule
+\end{tabularx}
+\caption{Different precise objects can sit behind the phrase ``neural manifold.'' The right column states the analysis outcome rather than assigning it an automatic mechanistic interpretation.}
+\label{tab:08-manifold-usage}
+\end{table}
+
+\begin{samepage}
+\section{When does a tuning map preserve a variable?}
+\begin{proposition}[A useful sufficient condition for a neural embedding]
+Let $M$ be a compact smooth manifold without boundary and $g:M\to\R^p$ a smooth injective immersion. Then $g$ is a smooth embedding, and $g(M)$ is a smooth embedded manifold diffeomorphic to $M$.
+\end{proposition}
+\end{samepage}
+\begin{proof}[Proof sketch]
+An immersion has an injective derivative on every tangent space, giving the required local smooth structure. A continuous injective map from a compact space to the Hausdorff space $\R^p$ is a homeomorphism onto its image: closed subsets of the domain are compact, and their images are compact and therefore closed. Thus the inverse on the image is continuous. Combining local rank with global topological injectivity gives an embedding.
+\end{proof}
+
+The conditions do distinct jobs. Full derivative rank prevents local collapse; injectivity prevents distant latent states from producing identical population means; compactness supplies the global topological conclusion in this convenient theorem. None is proved simply by obtaining good reconstruction on finitely many points. Chapter~\ref{ch:03} gives the underlying geometric definitions.
+
+\begin{example}[A population circle and an aliasing failure]
+For $g_i(\theta)=a+b\cos(\theta-\varphi_i)$, write
+\[
+ g(\theta)=a\mathbf1+b\big(c\cos\theta+s\sin\theta\big),
+ \quad c_i=\cos\varphi_i,\quad s_i=\sin\varphi_i.
+\]
+If $c$ and $s$ are linearly independent, equality $g(\theta)=g(\theta')$ implies equality of both sine and cosine, hence $\theta=\theta'$ modulo $2\pi$. The derivative is nonzero, so this is an embedded circle with an affine linear span of dimension two.
+If every cell instead depends only on $\cos(2\theta)$ and $\sin(2\theta)$, the observed image can still be a perfect circle, but $\theta$ and $\theta+\pi$ are indistinguishable. The topology of the image does not establish that absolute direction is represented injectively.
+\end{example}
+
+For nonlinear tuning with higher Fourier harmonics, a one-dimensional circular representation may require many PCs for accurate linear reconstruction. Conversely, a matrix with two dominant PCs could describe a disk, two branches, or a short trajectory segment. Linear dimension, intrinsic dimension, and topology therefore answer different questions.
+
+\section{Geometry depends on the chosen measurement}
+For a smooth curve $g(\theta)$, Euclidean activity-space distance induces the local metric
+\begin{equation}
+ \norm{g(\theta+\delta)-g(\theta)}^2
+   =G(\theta)\delta^2+o(\delta^2),
+ \qquad G(\theta)=\sum_i\left[g_i'(\theta)\right]^2.
+ \label{eq:08-induced-metric}
+\end{equation}
+This follows by Taylor expansion $g(\theta+\delta)=g(\theta)+g'(\theta)\delta+o(\delta)$. $\sqrt{G(\theta)}$ converts a small angular change into activity-space arc length. With equally spaced preferred angles and equal amplitudes, the cosine population has $G=pb^2/2$ when $p\geq3$ preferred angles are equally spaced around the circle. Uneven preferences or amplitudes make $G$ depend on angle. The representation can retain circular topology while distorting angular distances.
+
+Statistical discriminability defines another local metric. If independent counts satisfy $N_i\mid\theta\sim\operatorname{Poisson}(\Delta r_i(\theta))$ with strictly positive differentiable rates, the KL divergence between nearby count distributions expands as
+\begin{equation}
+ D_{\rm KL}\big(p_\theta\Vert p_{\theta+\delta}\big)
+ =\frac12\,\mathcal I(\theta)\delta^2+o(\delta^2),\qquad
+ \mathcal I(\theta)=\Delta\sum_i\frac{[r_i'(\theta)]^2}{r_i(\theta)}.
+ \label{eq:08-fisher}
+\end{equation}
+To see the denominator, expand the Poisson divergence
+$\lambda\log(\lambda/\lambda')-\lambda+\lambda'$ around $\lambda'=\lambda$; its leading term is $(\lambda'-\lambda)^2/(2\lambda)$. Summing across independent neurons gives Equation~\eqref{eq:08-fisher}. This metric weights changes by their observation noise. Correlated counts require a different model. Equal Euclidean distances need not mean equal decoding difficulty.
+
+A change of latent coordinates should transform a metric, not silently replace it. A change of recorded units, standardization, or neuron sampling can genuinely change the metric being analyzed. Claims of isometry must identify the two metrics compared, the scale range, and statistical uncertainty. Topology is unchanged by a homeomorphism; metric distances need not be.
+
+\section{Local dimension, sampling, and task restriction}
+In a sufficiently small neighborhood of a smooth embedded manifold, tangent-plane approximation suggests local PCA. Yet neighborhoods have competing scales. If they are too small, measurement noise dominates and there are too few neighbors. If too large, curvature and branches mix. One should look for a range of scales with consistent estimates, inspect sampling density, and compare against known-dimensional synthetic data passed through the same observation process.
+
+A task can restrict exploration. A one-dimensional trajectory can lie in a two-dimensional surface, which can itself lie in a higher-dimensional state space. Samples from a single path do not reveal unvisited directions. Conversely, collecting many conditions can combine distinct local regimes into a dataset that needs a larger global linear span. Thus dimension estimates should be accompanied by the sampled task, temporal scale, trial treatment, and number of recorded neurons.
+
+The distinction also matters for ``task-independent'' representations. Pooling conditions does not guarantee that the estimated structure is independent of task. It can average incompatible charts or merge separate states. To assess a shared manifold, fit using some conditions and test local neighborhoods, reconstruction, and behavioral predictions on held-out conditions. If a task variable is used to define an alignment, agreement with that same variable is not independent validation.
+
+\section{Head direction and grid-cell phase spaces}
+Head direction supplies a candidate periodic variable: $\theta$ and $\theta+2\pi$ denote the same direction. This motivates $S^1$ as a latent space before one asks whether neural data support it. Population analyses finding ring structure and its organization across behavioral states are a notable connection between representation and dynamics \citep{app_chaudhuri2019}; Chapter~\ref{ch:13} evaluates the evidence in detail. The ring's existence as an observed geometry and its interpretation as a recurrent attractor remain logically distinct propositions.
+
+For a single ideal grid module, let $\Lambda$ be the two-dimensional lattice of spatial translations that leave its phase code unchanged. Identifying locations that differ by a lattice vector produces
+\begin{equation}
+ T^2=\R^2/\Lambda.
+\end{equation}
+This quotient is a torus even when a parallelogram fundamental domain is drawn in the physical plane. The edges of the domain are identified; it is not a toroidal arena. A convenient embedding is
+\[
+ (\theta_1,\theta_2)\longmapsto
+ (\cos\theta_1,\sin\theta_1,\cos\theta_2,\sin\theta_2)\in\R^4.
+\]
+It has intrinsic dimension two and avoids the distortions of forcing the entire product torus into two Cartesian coordinates. A donut-shaped surface in $\R^3$ is another realization of the same topology, with a different metric. Population recordings from individual grid modules have supplied evidence of toroidal organization \citep{app_gardner2022}.
+
+The module qualification matters. Combining cells with different spatial scales or phase organizations changes the observation map and the joint structure under study. The topology of the animal's bounded environment, the topology of grid phase, and the topology of all recorded activity are three different objects. A toroidal population code can represent movement in a simply connected room; no physical obstacle is required.
+
+\section{Hippocampal and task-dependent representations}
+For an animal moving in an arena $A$, a place-tuning map $g:A\to\R^p$ may retain spatial neighborhoods if nearby locations evoke similar means and distant locations are distinguishable. But real observations may depend on direction, speed, context, internal state, and recent history. A more appropriate model could be $g(z,c,\psi)$ with position $z$, discrete context $c$, and phase $\psi$. Forgetting those variables may create apparent folds or intersections in the observed point cloud.
+
+A hypothetical population with identical firing at two distinct locations is a noninjective code for position even if an embedding algorithm separates the corresponding observations using time. Conversely, behavioral sampling around an obstacle can create a loop in visited locations without proving an intrinsic neural circuit loop. An analysis must distinguish environmental geometry, occupancy, tuning, and internally generated organization. Discovering a latent coordinate and then validating its association with behavior is useful precisely when these alternatives remain explicit \citep{app_rubin2019}.
+
+\begin{insight}{A neural manifold need not be an attractor}
+Set $\mathbf y(t)=g(u(t))$ for an externally controlled variable $u(t)$ taking values on a circle. The observations lie on a circular manifold even if the recorded system has no autonomous state or restoring dynamics. Alternatively, an autonomous recurrent system can have an attracting ring and produce the same sampled observations. Shape alone cannot distinguish these constructions. Removing or changing the drive, estimating responses to transverse perturbations, or comparing autonomous and driven predictive models adds the missing dynamical information.
+\end{insight}
+
+\section{Alignment across sessions and animals}
+The same computation can have different measured coordinates because different neurons are recorded or because latent axes are rotated. Given matched observation rows $Z_A,Z_B\in\R^{n\times k}$, orthogonal Procrustes alignment solves
+\begin{equation}
+ \hat R=\argmin_{R^\top R=I}\norm{Z_AR-Z_B}_F^2.
+ \label{eq:08-procrustes}
+\end{equation}
+If $Z_A^\top Z_B=U\Sigma V^\top$ is an SVD, one solution is $\hat R=UV^\top$. Expanding the squared norm leaves only the term $-2\tr(R^\top Z_A^\top Z_B)$ dependent on $R$, whose maximum is obtained by aligning the singular directions. Reflections are allowed here; if only rotations are permitted, an additional determinant constraint changes the solution.
+
+Canonical correlation analysis (CCA) permits general linear projections of both datasets and maximizes correlations between projected variables, often with regularization. It can remove scaling differences that Procrustes preserves. This flexibility can be useful, but it changes the invariances of the comparison: high canonical correlations do not imply equality of Euclidean metrics. Alignment-based work has reported stable latent motor dynamics across long recording intervals \citep{app_gallego2020}; the method and validation split specify the claim's scope.
+
+Fit alignment on training trials or conditions and evaluate on independent matched samples. A flexible transformation can fit noisy correspondences, especially with many dimensions and few observations. Compare with permutation controls that preserve task structure where appropriate, and report an unaligned baseline. For different animals, matched behavior and time are assumptions about correspondence rather than direct neuron identity.
+
+\begin{definition}[Dynamical correspondence]
+For discrete dynamics $F_A$ and $F_B$, an invertible coordinate map $g$ is a conjugacy when $g\circ F_A=F_B\circ g$. For smooth continuous-time vector fields, the corresponding condition is
+\begin{equation}
+ Dg(x)f_A(x)=f_B(g(x)).\label{eq:08-conjugacy}
+\end{equation}
+\end{definition}
+The chain rule explains this condition: transforming a trajectory of system $A$ must produce a trajectory of system $B$ with the same time parameter. Matching a cloud of states does not test it. A dynamical alignment should predict held-out transitions, input responses, or perturbation recovery after transformation. Allowing arbitrary time warps weakens the claim further by changing what counts as dynamical agreement.
+
+\section{Representation geometry and learning}
+For a linear readout $\hat y=w^\top h$, directions orthogonal to $w$ do not change the instantaneous output; directions along $w$ do. This divides activity into output-potent and output-null components relative to a specified readout, not into universally meaningful and meaningless neural variation. A null direction at one time can affect later outputs through recurrent dynamics.
+
+Geometric constraints can make some readout changes easier to learn. Experiments that changed a brain--computer interface mapping supplied evidence linking an estimated activity subspace to short-timescale learning constraints \citep{app_sadtler2014}. The mathematical prediction is conditional: if current activity remains near $\mu+Uz$, a readout requiring large components orthogonal to $U$ cannot be achieved by merely recombining the available coordinates. Whether the circuit can change $U$, and on what timescale, is a separate learning question.
+
+\section{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} For four preferred angles $0,\pi/2,\pi,3\pi/2$, write the cosine tuning map explicitly and calculate its covariance under uniform angle sampling. Compare its intrinsic and linear dimensions.
+\item \textbf{Intermediate.} Replace $\theta$ by $2\theta$ in every tuning curve. Prove that the observation map is two-to-one, and explain what a perfect circular embedding would fail to reveal.
+\item \textbf{Intermediate.} Derive Equation~\eqref{eq:08-fisher}. Compare Euclidean and Poisson discriminability metrics for two neurons with equal slopes but unequal baseline rates.
+\item \textbf{Intermediate.} Simulate two noisy sessions related by a rotation. Fit Procrustes on half the trials and evaluate the other half. Then scramble matched conditions and repeat.
+\item \textbf{Advanced.} Construct two systems with the same circular occupied set but different angular speeds and different radial stability. Which alignments preserve only geometry, which preserve orbits, and which satisfy Equation~\eqref{eq:08-conjugacy}?
+\end{enumerate}
+
+\section{Summary and further reading}
+A neural manifold is best specified through its latent domain, observation map, sampling process, and chosen metric. Smoothness and injectivity are substantive assumptions; topology does not determine geometry; alignment does not establish dynamical equivalence; and a represented manifold need not attract trajectories. Chapter~\ref{ch:09} adds topological measurements, while Chapter~\ref{ch:13} returns to the primary head-direction, grid, motor-control, and alignment studies as inference problems rather than merely illustrations.

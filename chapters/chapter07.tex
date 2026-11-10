@@ -1,0 +1,155 @@
+\chapter{Neural Dynamics and Attractor Models}\label{ch:07}
+
+\begin{insight}{Learning objectives}
+Translate a recurrent circuit model into a dynamical system; prove the energy-decrease property of an asynchronous Hopfield network; distinguish isolated memories from continuous families of equilibria; analyze tangential and transverse perturbations of a ring; and separate attractor evidence from persistence, occupancy, and slow transients.
+\end{insight}
+
+\section{From a circuit diagram to a state equation}
+A neuron stays active after a stimulus disappears. Does that observation establish a memory attractor? It establishes persistence over the observation window. Persistence could arise from recurrent feedback, a long membrane or synaptic timescale, a slowly changing input, or a sequence of transient states. The attractor hypothesis adds a precise statement about what nearby states do after the stimulus.
+
+A common rate-network model is
+\begin{equation}
+ \tau\dot x_i=-x_i+\sum_{j=1}^pW_{ij}\phi(x_j)
+                  +\sum_{a=1}^m B_{ia}u_a+b_i,
+ \qquad \tau>0.\label{eq:07-rate}
+\end{equation}
+Here $x_i$ is a dimensionless internal activation, $\phi(x_i)$ a dimensionless normalized rate, and an explicit rate scale converts it to spikes per second if required. The time constant $\tau$ has units of time; $W$, $B$, $u$, and $b$ are scaled so that the right-hand side is dimensionless. The decay term returns an isolated unit toward baseline. Recurrent input can oppose that decay, while the nonlinearity can limit growth. This model averages away individual spikes and usually omits adaptation and synaptic states. If those variables matter for the next state, they must be included in $x$.
+
+For constant input $u_0$, a fixed point satisfies
+\begin{equation}
+ x^*=W\phi(x^*)+Bu_0+b,
+ \qquad J(x^*)=\tau^{-1}\left[-I+W\diag\{\phi'(x^*)\}\right].
+ \label{eq:07-rate-jac}
+\end{equation}
+The order of factors matters: $\phi$ is applied to the presynaptic vector before multiplication by $W$. If instead the model defines $\tau\dot r=-r+\phi(Wr+Bu)$, its Jacobian contains $\diag(\phi')W$. A negative real part for every eigenvalue of the continuous-time Jacobian is sufficient for local asymptotic stability when $f$ is continuously differentiable. It says nothing by itself about the size of the basin.
+
+\begin{example}[Feedback creates or removes a memory timescale]
+For one linear unit, $\tau\dot x=-(1-w)x+u$. After setting $u=0$, $x(t)=x(0)e^{-(1-w)t/\tau}$. If $w<1$, the memory timescale is $\tau/(1-w)$; if $w=1$, every $x$ is an equilibrium; if $w>1$, the linear model is unstable. Very slow decay near $w=1$ is not exactly neutral integration. With $\phi=\tanh$, saturation can create additional stable fixed points when $w>1$, but their locations and stability must be checked rather than inherited from the linear example.
+\end{example}
+
+\section{Hopfield networks: a case with a provable energy}
+\label{sec:07-hopfield}
+Consider binary states $s_i\in\{-1,1\}$, symmetric weights $W_{ij}=W_{ji}$, and $W_{ii}=0$. Update one unit at a time according to its local field $h_i=\sum_jW_{ij}s_j+b_i$, setting $s_i'=\operatorname{sign}(h_i)$ and retaining the old state when $h_i=0$. Define
+\begin{equation}
+ E(s)=-\tfrac12s^\top Ws-b^\top s.\label{eq:07-hopfield-energy}
+\end{equation}
+This quantity is an algebraic Lyapunov function for the specified update, not necessarily physical thermodynamic energy. The classical construction connects recurrent computation to associative memory \citep{app_hopfield1982}.
+
+\begin{proposition}[Energy descent under asynchronous updates]
+Under the assumptions above, every state-changing single-unit update strictly decreases $E$. Consequently, a sequence that continues to update unstable units reaches a fixed configuration after finitely many state changes.
+\end{proposition}
+\begin{proof}
+Only terms involving unit $i$ change. Symmetry makes its two appearances in the quadratic form equal, and the zero diagonal removes a self-term. Therefore
+\[
+ E(s')-E(s)=-(s_i'-s_i)\left(\sum_jW_{ij}s_j+b_i\right)
+          =-(s_i'-s_i)h_i.
+\]
+A state change means $s_i$ has the opposite sign to the nonzero $h_i$, so the product is positive and the energy change negative. There are only $2^p$ configurations; strict descent cannot revisit one. At termination all units must satisfy the update rule, provided the scheduling rule does not indefinitely ignore an unstable unit.
+\end{proof}
+
+The assumptions are scientifically consequential. With two positively coupled units updated synchronously, $(1,-1)$ can alternate with $(-1,1)$ forever. The asynchronous proof does not apply. Asymmetric weights also remove the cancellation. A network may still have attractors without a known energy function; it may have cycles, transients, or more complicated invariant sets. Do not assign an ``energy landscape'' to an arbitrary recurrent network merely because its outputs appear to settle.
+
+For a smooth analogue with symmetric $W$, constant bias, and a strictly increasing invertible activation $r_i=\phi(x_i)$, define on its rate range
+\begin{equation}
+ E(r)=-\tfrac12r^\top Wr-b^\top r
+       +\sum_i\int_{r_i^0}^{r_i}\phi^{-1}(s)\,\mathrm ds.
+\end{equation}
+Here each $r_i^0$ is an arbitrary reference in the activation range. Along Equation~\eqref{eq:07-rate} with no changing input,
+\begin{equation}
+ \dot E=\sum_i[x_i-(Wr)_i-b_i]\dot r_i
+       =-\tau\sum_i\phi'(x_i)(\dot x_i)^2\leq0.
+\end{equation}
+This calculation illustrates how a candidate energy is verified. It does not alone prove every trajectory converges to a unique equilibrium; boundedness, properties of the zero-derivative set, and possible degeneracies still matter. It also makes clear why changing inputs can change the landscape while the system is moving.
+
+\section{Discrete memories, continuous memories, and bumps}
+An isolated stable fixed point can encode one categorical memory. A continuous variable requires a family of states or a transient code. An ideal continuous attractor is a continuous set of equilibria that attracts nearby states transversely, while remaining neutral along the represented variable. With the compact-attractor convention of Chapter~\ref{ch:02}, a closed ring can be such an attractor. The entire unbounded ``line attractor'' is not compact; that common phrase usually means a locally normally attracting line of equilibria or a bounded operating segment, not literally the same global definition.
+
+A transparent two-dimensional example is
+\begin{equation}
+ \dot x=(1-x^2-y^2)x,\qquad
+ \dot y=(1-x^2-y^2)y.\label{eq:07-ideal-ring}
+\end{equation}
+Writing $x=r\cos\theta$, $y=r\sin\theta$ gives $\dot r=r(1-r^2)$ and $\dot\theta=0$ for $r>0$. Thus $r=1$ is a circle of equilibria; the radial linearization has eigenvalue $-2$, and the tangent direction has eigenvalue zero. Points sufficiently close to the ring approach it. A tangential displacement changes the remembered angle and is not undone. Each individual point fails to be asymptotically attracting in the plane, but the ring as a set attracts nearby states. Adding $\dot\theta=\omega$ instead produces a periodic orbit when $\omega\ne0$, with the same geometric circle and a different computation.
+
+To represent angle in a neural population, define preferred directions $\varphi_i$ and a tuning map
+\begin{equation}
+ r_i(\theta)=a+b\cos(\theta-\varphi_i),\qquad a>b>0.
+ \label{eq:07-cosine-code}
+\end{equation}
+This gives nonnegative rates. A localized bump can use a narrower nonnegative tuning function. The bump is a pattern across neurons, whereas the ring is the set of all possible population patterns as the bump position varies. Neither requires the neurons to lie anatomically on a circle.
+
+One continuum network model uses a periodic neuronal label $\varphi$:
+\begin{equation}
+ \tau\partial_t r(\varphi,t)=-r(\varphi,t)+
+ \Phi\!\left[I_0+\int_0^{2\pi}w(\varphi-\varphi')
+                      r(\varphi',t)\frac{\mathrm d\varphi'}{2\pi}\right].
+ \label{eq:07-neural-field}
+\end{equation}
+Dependence only on the difference of labels makes the equation translation-equivariant: shifting a solution around the circle gives another solution. If a stationary bump exists, symmetry generates a family of translated stationary bumps. Differentiating that family with respect to its position yields a neutral tangent mode of the linearized operator. Existence of a bump and negative transverse growth rates require additional conditions; symmetry alone proves neither. Head-direction theories exploit this division between maintaining a bump and moving it using angular-velocity input \citep{app_zhang1996}.
+
+\begin{misconception}
+A finite network with equally spaced neurons does not automatically have exact continuous rotational symmetry. It has a finite cyclic symmetry. Discretization, heterogeneous weights, and heterogeneous excitability can pin the bump to preferred angles. Numerical demonstrations should measure angular drift and test more than a small set of initial positions.
+\end{misconception}
+
+\section{What perturbations would establish attraction?}
+A manifold learned from occupied states suggests where trajectories lie, not how the system responds off that manifold. In a model, separate a perturbation into tangent and normal components at a candidate point $x^*$:
+\[
+ \delta x=P_T\delta x+(I-P_T)\delta x,
+\]
+where $P_T$ is the orthogonal tangent projection in a specified metric. Apply matched small perturbations while holding inputs fixed. A continuous-attractor hypothesis predicts decay of the normal component and approximately neutral motion along the tangent. A driven tuning model can produce the same occupied ring while lacking autonomous persistence after the drive is removed.
+
+In biological experiments, perturbations rarely target a pure geometric direction. One can nevertheless ask whether displaced population states return, whether return depends on stimulus or feedback, and whether behavioral recovery agrees with the proposed basin structure. Recovery may be supplied by another brain area, so local perturbation and recovery do not prove that the recorded circuit alone contains the restoring mechanism. Head-direction analyses across waking and sleep reduce some sensory explanations; they do not turn incomplete observation into a full state-space proof \citep{app_chaudhuri2019}. Perturbation-based working-memory studies provide a complementary form of evidence \citep{app_inagaki2019}.
+
+\begin{insight}{A continuous-memory inference}
+\textbf{Object:} a normally attracting circle of equilibria. \textbf{Hypothesis:} a circuit retains angle through recurrent activity. \textbf{Observations:} population patterns, decoded angle, behavior, and perturbation responses. \textbf{Method:} estimate the ring, tangent directions, and return trajectories. \textbf{Supporting evidence:} transverse recovery with retained tangential displacement under controlled input. \textbf{Alternatives:} external stabilization or an unmeasured drive. \textbf{Limit:} finite data support an approximate mechanism on tested scales, not exact symmetry for all states and all time.
+\end{insight}
+
+\section{Decision making: integration, competition, and commitment}
+Two-choice decisions are often summarized by a scalar coordinate $q$, but different equations imply different mechanisms. A noisy integrator obeys
+\begin{equation}
+ \mathrm dq=I(t)\,\mathrm dt+\sigma\,\mathrm dW_t,
+\end{equation}
+with a decision when $q$ first reaches a chosen bound. Without input or noise every position is neutral; the absorbing bound is a stopping rule, not necessarily a stable neural equilibrium. A competing-attractor normal form instead is
+\begin{equation}
+ \mathrm dq=(\alpha q-\beta q^3+I)\,\mathrm dt
+              +\sigma\,\mathrm dW_t,
+ \qquad\alpha,\beta>0.\label{eq:07-choice}
+\end{equation}
+At $I=0$, its deterministic fixed points are $0$ and $\pm\sqrt{\alpha/\beta}$. The derivative is $\alpha-3\beta q^2$, so zero is unstable and the outer points are stable. A small signed input biases the drift and basin occupancy. A recurrent circuit can implement evidence integration and commitment through competition and slow reverberation, but such a model is a hypothesis about implementation, not a consequence of fitting a behavioral diffusion model \citep{app_wang2002}.
+
+The distinction affects experiments. Perturbing a pure integrator can permanently shift its coordinate; perturbing a stable categorical state can lead to recovery or basin switching. The comparison must use comparable inputs, observation noise, and decision rules. Ramp-shaped trial averages cannot choose between these models by themselves.
+
+\section{Transient computation and sequential activity}
+Stable dynamics can produce substantial transient amplification. Consider
+\begin{equation}
+ \dot x=Ax,\qquad A=\begin{pmatrix}-1&K\\0&-1\end{pmatrix}.
+\end{equation}
+Both eigenvalues equal $-1$, yet from $x(0)=(0,1)^\top$,
+\[
+ x(t)=e^{-t}(Kt,1)^\top.
+\]
+For large $K$, the first component initially grows and reaches its maximum at $t=1$. The eigenvectors are not an orthogonal basis; this is a non-normal system. A chain of such interactions can create sequential responses and finite-duration memory although all activity eventually decays. The lesson is general: asymptotic stability does not bound short-term amplification. Feedforward mechanisms for memory provide a concrete alternative to sustained-feedback accounts \citep{app_goldman2009}.
+
+A sequence of visited states may also result from changing input, adaptation, or passage near saddles. Identifying a sequence using a hidden Markov model does not prove that each inferred statistical state is a deterministic attractor. The hidden states summarize emission statistics and transition probabilities; the link to a vector field must be established separately.
+
+\section{Noise, occupancy, and metastability}
+For the one-dimensional stochastic gradient system
+\begin{equation}
+ \mathrm dq=-V'(q)\,\mathrm dt+\sqrt{2D}\,\mathrm dW_t,
+ \qquad V(q)=\tfrac\beta4q^4-\tfrac\alpha2q^2,
+\end{equation}
+$D$ has units of squared state per unit time. Under this constant-diffusion, confining, zero-current setting, the stationary density is proportional to $e^{-V(q)/D}$. This follows by setting the probability current $-V'p-Dp'$ to zero, which gives $p'/p=-V'/D$. A noise-driven trajectory can switch between neighborhoods of deterministic minima; those neighborhoods are metastable when their dwell times are long relative to local relaxation.
+
+This argument does not justify setting $V=-D\log\hat p$ for every neural dataset. Non-equilibrium currents, state-dependent diffusion, hidden variables, task-dependent sampling, and incomplete stationarity all break the inference from occupancy to a physical or dynamical potential. Recurrent models of cortical metastability connect state switching to circuit structure under specified assumptions \citep{app_mazzucato2015}; occupancy histograms alone do not identify those assumptions.
+
+\section{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} Verify the two-unit synchronous Hopfield cycle and calculate its energy at both states.
+\item \textbf{Introductory.} Linearize Equation~\eqref{eq:07-ideal-ring} at $(1,0)$ and identify the radial and tangential eigenvectors.
+\item \textbf{Intermediate.} Add a weak angular pinning term $\dot\theta=-\varepsilon\sin(m\theta)$ to the ideal ring. Locate stable and unstable angles. Why can finite data make this system look like a continuous attractor?
+\item \textbf{Intermediate.} For the non-normal example, compute the maximum first-coordinate amplitude and compare it with the asymptotic decay rate. Which summary would be misleading for a finite memory task?
+\item \textbf{Advanced.} Design perturbation experiments to distinguish autonomous memory, externally maintained tuning, and a slow stable transient. State what inputs must be controlled and what observations remain ambiguous when only part of the circuit is recorded.
+\end{enumerate}
+
+\section{Summary and further reading}
+Attractor models make predictions about invariant sets and nearby trajectories. Energy descent is available under special assumptions; continuous memory requires neutral tangent directions and restoring transverse directions; and persistent or sequential activity can arise without a stable memory state. Read \citet{app_hopfield1982} and \citet{app_zhang1996} for contrasting constructions, \citet{app_goldman2009} for transient-memory alternatives, and Chapter~\ref{ch:12} for an evidence hierarchy that applies these distinctions to experiments.

@@ -1,0 +1,37 @@
+\documentclass[11pt,oneside,openany]{book}
+\input{preamble}
+\begin{document}
+\frontmatter
+\input{frontmatter}
+\tableofcontents
+\listoffigures
+\mainmatter
+\part{Mathematical foundations}
+\include{chapters/chapter01}
+\include{chapters/chapter02}
+\include{chapters/chapter03}
+\include{chapters/chapter04}
+\include{chapters/chapter05}
+\part{Applications to neuroscience and machine learning}
+\include{chapters/chapter06}
+\include{chapters/chapter07}
+\include{chapters/chapter08}
+\include{chapters/chapter09}
+\include{chapters/chapter10}
+\include{chapters/chapter11}
+\part{Critical analysis of the research literature}
+\include{chapters/chapter12}
+\include{chapters/chapter13}
+\appendix
+\include{appendices/appendix_a}
+\include{appendices/appendix_b}
+\include{appendices/appendix_c}
+\include{appendices/appendix_d}
+\include{appendices/appendix_e}
+\backmatter
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

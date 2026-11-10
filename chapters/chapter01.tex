@@ -1,0 +1,198 @@
+\chapter{Data, vector spaces, and dimensionality reduction}\label{ch:01}
+\begin{insight}{Learning objectives}
+Represent observations without confusing samples with coordinates; derive PCA from projection error; distinguish four meanings of dimension; compare the mathematical quantities preserved by common embedding methods; and recognize what a low-dimensional picture cannot establish.
+\end{insight}
+
+\section{What is a dimension of data?}
+Suppose two instruments measure the same fluctuating signal, one at twice the gain of the other. Their output is a point $(s,2s)$ in a two-dimensional plotting space, but one number $s$ determines both readings. A third instrument measuring $s^2$ produces $(s,2s,s^2)$. There is still one freely varying parameter, yet the points generally do not lie on a line. The first example is linearly one-dimensional; the second is intrinsically one-dimensional but curved. Distinguishing these statements is the starting point of this book.
+
+Write $n$ observations of $p$ variables as
+\begin{equation}\label{eq:data-matrix}
+X=\begin{bmatrix}x_1^T\\\vdots\\x_n^T\end{bmatrix}\in\R^{n\times p},\qquad
+x_i=(x_{i1},\ldots,x_{ip})^T\in\R^p.
+\end{equation}
+The superscript $T$ means transpose. Rows are observations; columns are variables. A neural example has one row per time bin and one column per recorded neuron. The ambient dimension is $p$, independently of the number of observations. Having $n<p$ restricts the rank of the observed matrix, but does not establish that the underlying biological system has dimension at most $n$.
+
+\subsection{Spaces, bases, and rank}
+A real vector space is a set in which vectors can be added and multiplied by real numbers, subject to the familiar associative, distributive, identity, and inverse rules. A \emph{subspace} of $\R^p$ contains zero and is closed under these operations. The span of vectors $v_1,\ldots,v_k$ is the set of their linear combinations, $\sum_j a_jv_j$. These vectors are linearly independent when the only combination giving zero has every $a_j=0$. A basis is an independent spanning set; its number of elements is the dimension. Different bases provide different coordinates for the same subspace.
+
+A shifted plane $\mu+S$ is an affine subspace. It need not contain zero. This distinction explains why centering is part of ordinary PCA. For a matrix $A\in\R^{m\times p}$, its image is $\{Av:v\in\R^p\}$ and its null space is $\{v:Av=0\}$. Its rank is the dimension of its image. The rank--nullity identity is
+\begin{equation}
+\rank(A)+\dim\ker(A)=p.
+\end{equation}
+To see why, choose a basis of the null space and extend it to a basis of the domain. The images of the added basis vectors form a basis of the image. This elementary identity becomes useful when asking how many hidden changes a measurement map cannot detect.
+
+\subsection{Length, angles, and projection}
+An inner product assigns a symmetric bilinear quantity $\ip{v}{w}$ with $\ip{v}{v}>0$ for nonzero $v$. The Euclidean choice is $v^Tw$. Its norm is $\norm{v}_2=\sqrt{v^Tv}$; orthogonality means $v^Tw=0$. If the columns of $V\in\R^{p\times k}$ are orthonormal, $V^TV=I_k$, then
+\begin{equation}\label{eq:orth-projection}
+P=VV^T,\qquad z=V^Tx,\qquad \widehat x=Vz=Px
+\end{equation}
+are the orthogonal projection matrix, coordinates, and reconstruction. Indeed $P^T=P$, $P^2=P$, and $V^T(x-Px)=0$: the residual is perpendicular to the retained subspace. Consequently
+$\norm{x}_2^2=\norm{Px}_2^2+\norm{x-Px}_2^2$.
+This Pythagorean identity connects retained variance with reconstruction error.
+
+A norm satisfies positivity, absolute homogeneity, and the triangle inequality. Not every norm comes from an inner product. For example $\norm{x}_1=\sum_j|x_j|$ is a legitimate norm but does not support the same orthogonal-projection geometry. An algorithm's use of distance therefore makes a substantive choice, rather than merely choosing units for the final plot.
+
+\section{Covariance and singular values}
+Let $\bar x=n^{-1}\sum_i x_i$, and let $X_c$ contain rows $(x_i-\bar x)^T$. For $n\geq2$, the sample covariance is
+\begin{equation}\label{eq:sample-covariance}
+C=\frac{1}{n-1}X_c^TX_c,\qquad C_{ab}=\frac{1}{n-1}\sum_i(x_{ia}-\bar x_a)(x_{ib}-\bar x_b).
+\end{equation}
+For independent identically distributed observations with finite second moments this is an unbiased covariance estimator. For temporally correlated observations the same matrix describes sample dispersion, but familiar independent-sample uncertainty formulas no longer apply.
+
+$C$ is symmetric and positive semidefinite, since $v^TCv=\norm{X_cv}_2^2/(n-1)\geq0$. The spectral theorem gives an orthonormal eigenbasis:
+\begin{equation}
+C=V\diag(\gamma_1,\ldots,\gamma_p)V^T,\qquad
+\gamma_1\geq\cdots\geq\gamma_p\geq0.
+\end{equation}
+Here an eigenvector $v_j$ is a direction preserved by multiplication by $C$, and $\gamma_j$ is its eigenvalue. In general, a nonsymmetric matrix need not have a real orthogonal eigenbasis. The spectral theorem is being used because covariance has the required symmetry.
+
+The singular value decomposition, which does not require symmetry, writes any real matrix as $X_c=U\Sigma V^T$, with orthonormal singular vectors and nonnegative singular values $s_j$ on the rectangular diagonal of $\Sigma$. Multiplying out gives $C=V\Sigma^T\Sigma V^T/(n-1)$ and therefore
+\begin{equation}\label{eq:svd-pca}
+\gamma_j=s_j^2/(n-1).
+\end{equation}
+Computing PCA through the SVD of $X_c$ often avoids forming a large covariance matrix and avoids squaring its numerical condition number.
+
+If $D=\diag(C_{11},\ldots,C_{pp})$ has positive diagonal entries, the correlation matrix is $D^{-1/2}CD^{-1/2}$. PCA on this matrix is PCA after standardizing each variable to unit sample variance. A variable with zero sample variance requires separate treatment. Standardization changes the question: a small-variance variable receives as much marginal weight as a large-variance variable. Neither covariance-PCA nor correlation-PCA is universally correct.
+
+\section{Deriving principal component analysis}
+\subsection{One component: maximize variance}
+The scalar coordinate in unit direction $v$ is $z_i=v^T(x_i-\bar x)$. Its sample variance is $v^TCv$. The constrained optimization is
+\begin{equation}
+\max_{v^Tv=1}v^TCv.
+\end{equation}
+The Lagrangian $L(v,\lambda)=v^TCv-\lambda(v^Tv-1)$ has stationary condition $2Cv-2\lambda v=0$. Thus stationary directions are eigenvectors. Expanding any unit vector in the eigenbasis, $v=\sum_j a_jv_j$ with $\sum_j a_j^2=1$, gives
+$v^TCv=\sum_j\gamma_ja_j^2\leq\gamma_1$.
+The maximizing direction is a leading eigenvector. If the leading eigenvalue is repeated, the direction is not unique.
+
+\subsection{Several components: minimize reconstruction error}
+For $V_k^TV_k=I_k$, minimize the squared Frobenius norm, the sum of squared matrix entries:
+\begin{align}
+\norm{X_c-X_cV_kV_k^T}_F^2
+&=\norm{X_c}_F^2-\norm{X_cV_k}_F^2\\
+&=(n-1)\{\tr(C)-\tr(V_k^TCV_k)\}.\label{eq:pca-objective}
+\end{align}
+The first equality applies the projection identity to every row. Therefore minimizing error is equivalent to maximizing the sum of variances of $k$ orthogonal coordinates.
+
+\begin{theorem}[Optimal linear reconstruction]\label{thm:pca}
+For centered $X_c$ and $0\leq k\leq\min(n,p)$, projection onto $k$ leading right singular vectors minimizes \eqref{eq:pca-objective}. Its error is $\sum_{j>k}s_j^2$. The truncated SVD $U_k\Sigma_kV_k^T$ also minimizes $\norm{X_c-B}_F$ among all matrices $B$ of rank at most $k$.
+\end{theorem}
+\begin{proof}[Proof of the projection statement; sketch of the rank statement]
+In a covariance eigenbasis, $\tr(V_k^TCV_k)=\sum_j\gamma_jw_j$, where $w_j=\norm{V_k^Tv_j}_2^2$, $0\leq w_j\leq1$, and $\sum_jw_j=k$. This weighted sum cannot exceed $\sum_{j=1}^k\gamma_j$. Choosing the leading eigenvectors attains it. For arbitrary rank-$k$ $B$, let $S$ be its row space. Each row of $X_c$ is approximated at least as well by its orthogonal projection onto $S$ as by the corresponding row of $B$. The first result then bounds the error of every such $B$.
+\end{proof}
+
+The explained variance ratio of component $j$ is $\gamma_j/\sum_l\gamma_l$, provided total variance is nonzero. A chosen threshold, for example 90\%, defines a \emph{variance-threshold dimension}, not an intrinsic dimension theorem.
+
+\begin{example}[A complete two-variable calculation]
+For $C=\left[\begin{smallmatrix}2&1\\1&2\end{smallmatrix}\right]$, the eigenvectors are $v_1=(1,1)^T/\sqrt2$ and $v_2=(1,-1)^T/\sqrt2$, with eigenvalues 3 and 1. The first PC captures $3/4$ of the variance. A centered observation $(2,0)$ has first-PC score $\sqrt2$ and reconstruction $(1,1)$. Its discarded residual $(1,-1)$ has squared length 2. Choosing a different basis within the same retained subspace changes coordinates, not reconstructions.
+\end{example}
+
+\begin{misconception}
+A principal component is neither a particular neuron nor automatically a causal variable. Its sign is arbitrary, and tied eigenvalues allow rotations within their eigenspace. A task-relevant signal can have small variance and be discarded by an optimal variance-preserving projection.
+\end{misconception}
+
+\section{Four different dimensions}
+\begin{definition}[Dimension terminology]
+The \emph{ambient dimension} is the number of coordinates in the measurement space. The \emph{linear dimension} of exact centered data is $\rank(X_c)$; approximate linear dimension requires an explicit error or variance criterion. The \emph{intrinsic dimension} of a smooth manifold is its local number of independent coordinates (Chapter~\ref{ch:03}). An \emph{effective dimension} summarizes a spectrum or task-dependent notion of complexity and need not be an integer.
+\end{definition}
+For nonnegative covariance eigenvalues with positive sum, the participation ratio is
+\begin{equation}\label{eq:participation-ratio}
+d_{\rm PR}=\frac{(\sum_j\gamma_j)^2}{\sum_j\gamma_j^2}
+=\frac{1}{\sum_jq_j^2},\qquad q_j=\frac{\gamma_j}{\sum_l\gamma_l}.
+\end{equation}
+If $r$ eigenvalues are nonzero, $1\leq d_{\rm PR}\leq r$. The upper bound follows from Cauchy--Schwarz, $(\sum_j\gamma_j)^2\leq r\sum_j\gamma_j^2$. Equality at the upper bound requires equal nonzero eigenvalues. The spectral entropy dimension $\exp(-\sum_jq_j\log q_j)$ is another summary; it is not generally equal to the participation ratio.
+
+\begin{example}[A circle defeats a single linear dimension]
+Let $x(\theta)=(\cos\theta,\sin\theta)$ with $\theta$ uniform on $[0,2\pi)$. The covariance is $I_2/2$, so $d_{\rm PR}=2$, and two PCs are required for exact reconstruction. Yet a short arc needs only the angle as a local coordinate: intrinsic dimension is one. No continuous injective real-valued global coordinate can represent the entire circle without a cut. Topology, rather than an inadequate optimization algorithm, creates this obstruction.
+\end{example}
+
+Noise makes these differences sharper. If $y=s+\eta$ with independent zero-mean isotropic noise of covariance $\sigma^2I_p$, then $C_y=C_s+\sigma^2I_p$. Every covariance eigenvalue is increased by $\sigma^2$. A smooth curve with full-support additive Gaussian noise has a full-dimensional observation distribution; calling it a ``one-dimensional noisy manifold'' is a model for its signal component, not a literal statement about the support of $y$.
+
+\subsection{Estimating local dimension}
+One approach fits PCA in neighborhoods. For a smooth $d$-dimensional surface and sufficiently small neighborhoods, tangent variation dominates curvature, but neighborhoods that are too small are dominated by noise and sampling variability. Thus the useful scale lies between noise and curvature scales, if such a range exists.
+
+Distance estimators use the fact that volume of a small $d$-dimensional ball scales as $r^d$. Write $T_j(x)$ for the distance from $x$ to its $j$th nearest neighbor. A common local likelihood estimator is
+\begin{equation}\label{eq:local-dimension}
+\widehat d_k(x)=\left[\frac{1}{k-1}\sum_{j=1}^{k-1}\log\frac{T_k(x)}{T_j(x)}\right]^{-1}.
+\end{equation}
+The approximation treats local density as constant and neighbor counts as a Poisson process; finite-sample bias corrections and pooling choices matter \citep{levina2004}. Duplicates, boundaries, strongly varying density, correlated sampling, and measurement noise violate parts of this approximation. Plotting estimates across a range of $k$, sample sizes, and noise levels is more informative than one reported integer. A plateau across scales is supporting evidence, not a proof of smooth manifold structure.
+
+\section{Distances encode a scientific choice}
+Euclidean distance measures squared coordinate differences. For a positive definite matrix $M$, $d_M(x,y)=\sqrt{(x-y)^TM(x-y)}$ is a metric: it is Euclidean distance after an invertible linear change of coordinates. A covariance-based Mahalanobis metric chooses $M=C^{-1}$, but estimating and inverting $C$ can be unstable; regularization changes the metric. If $M$ is only positive semidefinite, distinct points may have distance zero, giving a pseudometric rather than a metric.
+
+Cosine similarity compares direction after dividing by vector lengths. The quantity $1-\cos\theta$ is widely called a distance but does not generally satisfy the triangle inequality. Angular distance on normalized nonzero vectors is a metric. Correlation distance additionally subtracts each vector's mean. These choices remove different information: overall firing-rate magnitude may be signal in one experiment and nuisance in another. Distance-dependent topology and clustering inherit these choices.
+
+\section{Beyond PCA: what is each algorithm trying to preserve?}
+An embedding is a collection of coordinates $z_i\in\R^k$ in this computational section. It is not automatically an embedding in the differential-geometric sense of Chapter~\ref{ch:03}. We state the main objectives so that attractive figures can be judged against what was actually optimized.
+
+\subsection{Multidimensional scaling and Isomap}
+For Euclidean pairwise distances $D_{ij}=\norm{x_i-x_j}$, define $H=I_n-\mathbf1\mathbf1^T/n$. Double-centering squared distances gives
+\begin{equation}\label{eq:classical-mds}
+B=-\tfrac12 H(D^{\circ2})H=X_cX_c^T.
+\end{equation}
+Here $D^{\circ2}$ means entrywise squares. Expanding $D_{ij}^2=\norm{x_i}^2+\norm{x_j}^2-2x_i^Tx_j$ proves the identity: centering annihilates the separate row and column norm terms. Classical MDS uses the leading positive eigenpairs of $B$ as coordinates. For Euclidean distances, these are PCA scores up to an orthogonal transformation. With arbitrary dissimilarities, negative eigenvalues show that exact Euclidean realization is impossible. Classical MDS minimizes a Gram-matrix approximation error; \emph{metric stress MDS}, which minimizes weighted errors in distances, is a different objective.
+
+Isomap forms a neighborhood graph, weights edges by observed distances, computes graph shortest-path distances, and applies classical MDS \citep{tenenbaum2000}. If sampling is dense, neighborhoods are sufficiently local, and the manifold geometry admits the desired flat parameterization, these graph distances can approximate intrinsic distances. Short-circuit edges between nearby folds corrupt them; too few edges disconnect the graph. A curved sphere does not become globally isometric to a Euclidean plane simply because its graph distances are estimated accurately.
+
+\subsection{Locally linear embedding}
+LLE first finds local reconstruction weights with $w_{ij}=0$ outside each neighborhood and $\sum_jw_{ij}=1$, minimizing $\sum_i\norm{x_i-\sum_jw_{ij}x_j}^2$. It then holds the weights fixed and minimizes
+\begin{equation}
+\sum_i\norm{z_i-\sum_jw_{ij}z_j}^2,
+\quad \sum_i z_i=0,\quad n^{-1}Z^TZ=I_k.
+\end{equation}
+Centering and scaling constraints prevent the collapsed solution $z_i=0$. The second step is a sparse eigenproblem \citep{roweis2000}. Preserving local affine reconstruction coefficients can reveal smooth structure, but depends on neighborhoods, numerical regularization, and sampling. It does not directly preserve all geodesic distances.
+
+\subsection{Diffusion maps}
+A nonnegative symmetric kernel, for example $K_{ij}=\exp[-\norm{x_i-x_j}^2/\epsilon]$, defines weighted connectivity. Normalize rows to get a Markov matrix $P_{ij}=K_{ij}/\sum_lK_{il}$, whose rows sum to one. Its powers describe a random walk on observations, not necessarily physical neural time. For a connected reversible chain with strictly positive stationary probabilities $\pi_j$, the diffusion distance at walk time $m$ is
+\begin{equation}
+D_m(i,l)^2=\sum_j\frac{(P^m_{ij}-P^m_{lj})^2}{\pi_j}
+=\sum_{a\geq1}\lambda_a^{2m}(\psi_a(i)-\psi_a(l))^2,
+\end{equation}
+using right eigenvectors normalized in the $\pi$-weighted inner product and excluding the constant eigenvector. Truncating coordinates $\lambda_a^m\psi_a(i)$ approximates this distance. Kernel normalization controls how sampling density affects the limiting operator \citep{coifman2006}. Without assumptions connecting the sampling process to real dynamics, diffusion coordinates are geometric summaries, not recovered dynamical modes.
+
+\subsection{t-SNE and UMAP}
+t-SNE converts local distances into affinities. For $j\ne i$, $p_{j|i}$ is proportional to $\exp[-\norm{x_i-x_j}^2/(2\sigma_i^2)]$, normalized over $j$. Local bandwidths are chosen using perplexity, an effective neighbor-count parameter. Set $p_{ij}=(p_{j|i}+p_{i|j})/(2n)$ and $q_{ij}\propto(1+\norm{z_i-z_j}^2)^{-1}$. The optimized loss is
+\begin{equation}
+\operatorname{KL}(P\|Q)=\sum_{i\ne j}p_{ij}\log(p_{ij}/q_{ij}).
+\end{equation}
+Large original affinities receive strong protection; global distances and displayed cluster sizes have no corresponding general preservation guarantee \citep{vandermaaten2008}.
+
+UMAP combines adaptive neighborhood affinities into symmetric fuzzy edge weights $w_{ij}$ and fits low-dimensional affinities $v_{ij}=(1+a\norm{z_i-z_j}^{2b})^{-1}$. Its nominal fuzzy-set cross-entropy, up to constants independent of $Z$, is
+\begin{equation}
+-\sum_{i<j}\{w_{ij}\log v_{ij}+(1-w_{ij})\log(1-v_{ij})\}.
+\end{equation}
+Practical optimization uses sampled edges and negative samples, so the implementation's effective weighting need not equal full all-pairs optimization. Neighborhood size, minimum-distance settings, and random initialization change the output. The method's mathematical motivation does not certify that input data form a manifold or that a displayed hole reflects the original data \citep{mcinnes2018}.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabularx}{\linewidth}{p{.16\linewidth}XX}
+\toprule Method & Main preserved or optimized quantity & Principal interpretive limitation\\\midrule
+PCA & Orthogonal linear reconstruction; retained variance & Curved signals may require many PCs; low variance need not be unimportant.\\
+Classical MDS & Centered Gram matrix inferred from distances & Negative eigenvalues or truncation indicate geometric distortion.\\
+Isomap & Graph estimates of geodesic distance, then MDS & Needs reliable neighborhoods and compatible target geometry.\\
+LLE & Local affine reconstruction weights & Neighborhoods and regularization determine local constraints.\\
+Diffusion maps & Random-walk connectivity at a chosen scale & Walk time is an analysis parameter; density normalization matters.\\
+t-SNE & KL divergence between affinities & Distances between separated clusters are not generally calibrated.\\
+UMAP & Fuzzy neighborhood affinities with sampled optimization & A two-dimensional layout is not a topology certificate.\\\bottomrule
+\end{tabularx}
+\caption{Different dimensionality reductions answer different mathematical questions.}
+\end{table}
+
+\section{Worked analysis: a curve, noise, and an honest conclusion}
+Consider $s\sim\operatorname{Uniform}[-1,1]$ and $x=(s,s^2)$. Centering gives mean $(0,1/3)$ and covariance $\diag(1/3,4/45)$, because $\E[s^2]=1/3$, $\E[s^4]=1/5$, and odd moments vanish. The first PC explains $(1/3)/(1/3+4/45)=15/19$ of variance. Linear rank is two, while the map $s\mapsto(s,s^2)$ is a smooth injective curve with nonzero derivative. Add isotropic observation noise and both eigenvalues rise. One should report the retained-variance curve, local dimension estimates over scales, noise assumptions, and held-out reconstruction. Calling the cloud ``two-dimensional'' or ``one-dimensional'' without specifying which meaning hides the central distinction.
+
+A useful held-out procedure fits centering, scaling, and axes on training observations, then reconstructs independent test observations. For time series, split by trials or contiguous blocks to avoid leakage from near-identical adjacent samples. Choose the dimension using training/validation data, reserve a final test set, and compare with explicit noise and sampling controls. This estimates predictive usefulness of a representation; it does not by itself prove a manifold theorem.
+
+\section{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} Compute the PCA axes, explained variance, and participation ratio of $\diag(9,1,0)$. Explain why three numbers are needed to describe ambient, exact linear, and effective dimension.
+\item \textbf{Introductory.} Show that scaling one variable changes covariance-PCA. Give a two-variable example in which the leading PC changes after standardization.
+\item \textbf{Intermediate.} Derive \eqref{eq:classical-mds} explicitly and show why translating all observations leaves the distances unchanged.
+\item \textbf{Intermediate.} For $p$-dimensional isotropic noise added to a rank-one signal with covariance eigenvalue $a$, derive $d_{\rm PR}$ as a function of $a$ and $\sigma^2$. Check both noise limits.
+\item \textbf{Intermediate.} Sample a circle nonuniformly. Compare global PCA and neighborhood-based dimension estimates. Separate geometric effects from sampling-density effects.
+\item \textbf{Advanced.} Explain why no continuous one-to-one map $S^1\to\R$ exists, using compactness and the effect of removing a point. Identify the assumption that an attempted one-dimensional embedding must violate.
+\item \textbf{Advanced.} Design a blocked cross-validation scheme for choosing both smoothing bandwidth and latent dimension. State which transformations must be refitted inside each training split.
+\end{enumerate}
+
+\section{Summary and further reading}
+PCA is an exact solution to a specified linear reconstruction problem. Its variance spectrum is not an intrinsic-dimension estimator without further assumptions. Nonlinear methods optimize different neighborhood, distance, or affinity objectives; none turns visualization into proof. The primary method papers provide the relevant objectives and assumptions: Isomap \citep{tenenbaum2000}, LLE \citep{roweis2000}, diffusion maps \citep{coifman2006}, t-SNE \citep{vandermaaten2008}, UMAP \citep{mcinnes2018}, and neighbor-based dimension estimation \citep{levina2004}. Chapter~\ref{ch:03} supplies the geometric meaning of the word manifold; Chapter~\ref{ch:06} adds observation models and neural preprocessing.

@@ -1,0 +1,127 @@
+\chapter{Topological Data Analysis in Neuroscience}\label{ch:09}
+
+\begin{insight}{Learning objectives}
+Identify the vertices and metric in a neural topological analysis; turn a population activity matrix into a reproducible persistence calculation; choose a test statistic and a scientifically interpretable null; distinguish a persistent feature from a unique topological identification; and understand how cohomology can produce circular coordinates.
+\end{insight}
+
+\section{What is a point, and what is a hole?}
+There are at least two distinct ways to build a complex from neural recordings. In a \emph{state-space analysis}, each vertex is a population observation at one time or trial, and distances compare activity vectors. In a \emph{neuron-correlation analysis}, each vertex is a neuron, and edges are added according to pairwise correlation or another relation. A loop in the first complex concerns the arrangement of observed population states; a loop in the second concerns the structure of relationships among neurons. These are not interchangeable interpretations.
+
+Clique-topology analyses of neural correlation matrices illustrate the second construction \citep{app_giusti2015}. The ring and torus pipelines emphasized here use the first. Before examining a barcode, write down what its vertices mean. Also distinguish the topology of an experimental environment, the topology of a represented variable, and the topology of a sampled observation distribution.
+
+For population vectors $\mathbf y_1,\ldots,\mathbf y_n$, choose a distance $d$. At edge threshold $\varepsilon$, the Vietoris--Rips complex contains a simplex whenever every pair of its vertices has distance at most $\varepsilon$. Over the coefficient field $\F_2$, persistence records births and deaths of connected components in $H_0$, loop classes in $H_1$, and cavity classes in $H_2$. Chapter~\ref{ch:04} explains why cycles must be quotiented by boundaries. The algorithm does not inspect neuron labels, infer a causal circuit, or distinguish time ordering unless those are deliberately incorporated into the construction.
+
+\section{A complete synthetic population pipeline}
+\label{sec:09-pipeline}
+We now specify an analysis that can be executed without downloading biological recordings. Its purpose is to check what a topological statistic detects under a known observation model. It is not a replication of an experimental paper. The corresponding implementation is \texttt{code/07\_neural\_persistence.py}.
+
+\subsection{Question and generative assumptions}
+The question is whether a set of population rate observations contains coordinated circular structure that exceeds a null of independent neuron columns. Take $p=24$ preferred angles $\varphi_i$ uniformly spaced on $[0,2\pi)$ and define
+\begin{equation}
+ r_i(\theta)=2+4\exp\{2[\cos(\theta-\varphi_i)-1]\},\qquad
+ y_i=r_i(\theta)+\epsilon_i,\quad
+ \epsilon_i\sim\mathcal N(0,0.15^2).\label{eq:09-synthetic}
+\end{equation}
+Angles are sampled independently and uniformly. Rates are in arbitrary normalized units. Gaussian observation noise makes this a rate-observation demonstration, not a spike-train model. The neural tuning shape is smooth and periodic; the independent sampling removes temporal autocorrelation as a complication in this first tutorial.
+
+Generate 500 training observations and a separate 180-observation test set. The training set determines centering and an eight-component PCA projection. The test set determines the topological statistic. The latent angle is retained only for coloring and validation; it is not an input to PCA, persistence, or the permutation statistic.
+
+\subsection{Preprocessing and metric}
+Fit $\widehat\mu\in\R^{24}$ and orthonormal loading matrix $U\in\R^{24\times8}$ on training data. Form test coordinates
+\begin{equation}
+ z_j=U^\top(\mathbf y_j-\widehat\mu),\qquad
+ d_{jk}=\norm{z_j-z_k}_2.\label{eq:09-projection}
+\end{equation}
+No whitening is applied: whitening would divide directions by their estimated standard deviations and define a different metric. The retained PC count is fixed in this demonstration. If it were tuned to maximize a test barcode, that selection would need to be repeated inside the null procedure or separated from the final test.
+
+PCA reduces computational burden and suppresses some observation noise, but it can also collapse a loop. Therefore the script also calculates $H_1$ persistence in the original 24-dimensional observation space. Agreement is a useful robustness check; disagreement identifies an analysis dependency rather than a reason to choose the nicer result. A percentage of explained variance does not by itself guarantee preservation of topology.
+
+\subsection{Filtration and diagram}
+Compute the Rips filtration on the test distances, using edge-length parameter $\varepsilon$ and coefficients in $\F_2$. The tutorial calculates dimensions zero and one with Ripser, an implementation designed for efficient Rips persistence \citep{app_bauer2021}. For each homology dimension, the output is an array of pairs $(b_j,d_j)$, where $b_j$ is birth threshold and $d_j$ is death threshold. The lifetime is $\ell_j=d_j-b_j$.
+
+A finite set becomes a full simplex once every edge is present; all positive-dimensional classes then vanish. Thus an infinite endpoint in a deliberately truncated positive-dimensional calculation often means ``death not observed before the chosen cutoff,'' not ``an eternal hole.'' Ordinary $H_0$ has one essential component after all points connect. Handle essential and censored intervals explicitly rather than placing them at arbitrary finite heights in a statistic.
+
+The prespecified statistic is the maximum finite first-homology lifetime,
+\begin{equation}
+ T(X)=\max\big(\{d_j-b_j:(b_j,d_j)\in D_1(X),\ d_j<\infty\}\cup\{0\}\big).
+ \label{eq:09-statistic}
+\end{equation}
+This asks whether there is an unusually persistent loop under the chosen metric and null. It does not count all loops as equally informative. The maximum already accounts for selecting the longest observed bar within this one statistic; it does not account for an unreported search over embeddings, conditions, metrics, or homology dimensions.
+
+\subsection{Null model and randomization}
+Independently permute the 180 test-row indices in each neuron column. This preserves each neuron's empirical marginal distribution while destroying its coordinated alignment with other neurons. Apply the \emph{same frozen training transformation} to every surrogate, then recompute its full persistence diagram and maximum lifetime. Generate $B=99$ surrogates and calculate
+\begin{equation}
+ p_{\rm rand}=\frac{1+\sum_{b=1}^{B}\mathbf1\{T_b\ge T_{\rm obs}\}}{B+1}.
+ \label{eq:09-randomization}
+\end{equation}
+The added one prevents a zero Monte Carlo value. Under the permutation null, exchangeability of row labels within independent columns supplies the randomization justification. The independent training set makes conditioning on the fitted projection legitimate. At $B=99$, the smallest reportable value is $0.01$; this is limited resolution, not evidence for an arbitrarily small probability.
+
+The null is intentionally specific. Rejection says that the coordinated observations differ from independently paired neuronal marginals for this statistic. Many forms of dependence, including common sensory drive, can cause rejection. It is not a test of recurrence versus feedforward coding, nor a formal test that the latent manifold is exactly $S^1$.
+
+\subsection{Output, interpretation, and validation}
+The script saves the population matrices, held-out PCA coordinates, learned centering and components, diagrams, null lifetimes, figures, and numerical summaries. The expected qualitative result is a prominent $H_1$ feature for a sufficiently sampled low-noise circular code, compared with the independent-column surrogate distribution. Actual values come from the executed tutorial output reported in Chapter~\ref{ch:11}; they should not be guessed from the picture.
+
+The first two PCs provide a visualization, while persistence uses eight PCs. The plotted two-dimensional shape is therefore not the object on which the topological statistic was computed. Independent angle coloring checks whether the recovered organization tracks the known latent variable. To test sensitivity, repeat the prespecified analysis after increasing noise, restricting the angle range, reducing sample size, or using nonuniform occupancy. A failed loop detection under poor coverage does not demonstrate that the generative code lacks a circle.
+
+\begin{insight}{What this tutorial establishes}
+\textbf{Mathematical object:} persistent homology of a finite metric-space filtration. \textbf{Hypothesis:} coordinated rate observations contain stable circular organization. \textbf{Evidence:} the measured barcode and its maximum-lifetime comparison with a specified surrogate ensemble. \textbf{Alternative:} externally driven periodic tuning generates the entire effect here. \textbf{Inference limit:} detecting the loop validates a feature of the observation model and the analysis, while providing no autonomous-attractor mechanism.
+\end{insight}
+
+\section{Real recordings require different controls}
+Recorded time bins are generally not independent. Independent column permutations destroy each neuron's temporal autocorrelation, which can make that null too easy to reject. Independent circular shifts of whole neuronal time series preserve within-neuron temporal structure approximately under stationarity but disrupt alignment; they also change stimulus and behavior relationships. Block permutations preserve short-range order within blocks but introduce boundaries and depend on block length. Trial permutations can preserve time-varying condition means while disrupting trial-specific shared fluctuations. Each control asks a different question.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabularx}{\linewidth}{p{.23\linewidth}XX}
+\toprule
+Surrogate & Approximately preserves & Removes or changes \\
+\midrule
+Independent neuron-column shuffle & Marginal amplitudes for independent samples & Coactivity and temporal dependence \\
+Independent temporal shifts & Each neuron's temporal pattern in stationary data & Cross-neuron alignment and often behavior alignment \\
+Within-condition trial shuffle & Condition-locked mean response and within-trial timing & Trial-specific coordinated variability \\
+Conditional tuning simulation & Estimated behavior-dependent rates and chosen noise model & Structure unexplained by the fitted behavioral model \\
+Matched recurrent or feedforward simulation & Specified observation noise and sampling & Only the mechanistic feature explicitly varied \\
+\bottomrule
+\end{tabularx}
+\caption{A null distribution is an experimental design expressed computationally. Preserving one property can remove another that matters scientifically.}
+\end{table}
+
+Conditional simulations are especially useful when behavior has known topology. Fit neuronal tuning to measured position and direction on training data, simulate observations along the recorded behavioral trajectory with a specified noise model, and compare the real statistic to that baseline. If the baseline also produces a ring, the ring is not sufficient evidence for an internally generated attractor. If the data exceed it, the difference may indicate missing tuning variables, correlated noise, or internal structure; further comparisons are necessary.
+
+Estimate uncertainty at the relevant independent level. Resampling single correlated bins as if they were independent inflates precision. Trial or temporal-block resampling can address dependence, but duplicated points and changes in coverage affect persistence itself. Report coverage and subsampling curves, and distinguish sampling variability from the deterministic stability theorem for perturbations of a fixed metric dataset. Hyperparameters chosen after viewing results require nested validation or selection-adjusted nulls.
+
+\section{Circle, sphere, torus, and absence of convincing structure}
+For densely sampled ideal spaces at appropriate scales, expected ordinary Betti numbers over a field are $(\beta_0,\beta_1,\beta_2)=(1,1,0)$ for a circle, $(1,0,1)$ for a sphere, and $(1,2,1)$ for a torus. A filled disk has no positive-dimensional homology. These are topological statements about the ideal spaces, not guarantees for every noisy finite sample or every Rips scale. Chapter~\ref{ch:11} generates these examples and checks how finite cutoffs and coverage affect their diagrams.
+
+A noisy ring can retain a long loop while gaining many short bars. A sparse disk sample can contain accidental empty regions. A sphere projected onto a plane can lose its cavity; a torus projected into a plane can acquire intersections. A two-dimensional UMAP visualization optimized for neighborhoods supplies no general guarantee that its holes match those of the original metric space. Compute topology in a justified analysis space and use two-dimensional maps as visual aids.
+
+Even the ideal Betti pattern $(1,2,1)$ is not a unique certificate of a torus. For instance, a space formed by attaching two circles and a sphere at one point has those same Betti numbers over a field and is not a two-dimensional manifold. Additional local-manifold assumptions, dimensions, cohomology products, or geometric models can strengthen identification. Similarly, one nontrivial $H_1$ class is compatible with a thick annulus and many more complicated spaces, not only a circle.
+
+\section{Persistent cohomology and circular coordinates}
+A barcode describes the existence and scale of a feature. It does not by itself provide a coordinate for each observation. Cohomology can supply a representative cocycle, an assignment of values to oriented edges satisfying compatibility around triangles. Persistent cohomology has the same interval information as homology over a field, while its representatives are useful for constructing circle-valued coordinates \citep{desilva2011}.
+
+To explain the construction, suppose an integral closed edge cochain $\alpha$ has already been obtained at a chosen scale. Closed means its oriented sum around every filled triangle is zero. Choose a real vertex function $f$ to minimize
+\begin{equation}
+ \sum_{(i,j)\in E}w_{ij}\,[\alpha_{ij}+f_j-f_i]^2,
+ \qquad w_{ij}>0.\label{eq:09-circular-smoothing}
+\end{equation}
+The derivative with respect to $f$ gives a weighted graph-Laplacian linear system. Fixing one vertex value removes the arbitrary additive constant on a connected graph. Adding the coboundary $f_j-f_i$ preserves sums around cycles, because those differences telescope. The smoothed cocycle therefore retains integral periods, and $f$ modulo one gives circle-valued vertex coordinates, up to orientation and phase conventions. One may multiply by $2\pi$ to report radians.
+
+The integral premise is essential. A cocycle computed over $\F_2$ is not a real-valued angle, and lifting a finite-field class to an integral closed class can require an additional algorithm and verification. Harmonic smoothing does not guarantee uniform speed around the circle: sampling density and graph weights matter. Two independent circle coordinates are candidates for a torus parametrization, but coordinate independence and coverage must be checked. The standalone persistence tutorial deliberately stops at barcodes; this section explains the additional mathematics without claiming an implemented cohomological decoder.
+
+\section{Connecting topology to neuroscience}
+Topological methods are valuable when a low-dimensional representation needs multiple charts, when a global Cartesian visualization introduces cuts, or when one wants a multiscale summary less dependent on visual judgment. They complement geometric embedding and behavioral decoding. They do not replace model checking, and their stability results do not remove systematic errors introduced by the observation process.
+
+Ring and grid-cell studies connect these methods to candidate internal variables \citep{app_chaudhuri2019,app_gardner2022}. A strong analysis combines topology with independent behavior, cross-condition organization, appropriate surrogate controls, and, where feasible, perturbational tests. The mathematical statement concerns the reconstructed state space. The biological interpretation additionally concerns how that state space is generated and used.
+
+\section{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} In a state-space analysis of 100 neurons and 1,000 time bins, how many vertices are there? Answer again for a neuron-correlation complex. What does an edge mean in each case?
+\item \textbf{Introductory.} With 99 null draws and two null statistics at least as large as the observation, calculate Equation~\eqref{eq:09-randomization}. Explain why this is not the probability that the null hypothesis is true.
+\item \textbf{Intermediate.} In the synthetic pipeline, restrict angles to half the circle. Predict the effect on topology and distinguish missing coverage from a changed tuning map.
+\item \textbf{Intermediate.} Derive the normal equations for Equation~\eqref{eq:09-circular-smoothing}; identify the constant-vector null space.
+\item \textbf{Advanced.} Design two nulls for a head-direction recording: one testing coordinated activity beyond marginal rates, another testing structure beyond measured head-direction tuning. Explain why rejecting the first need not reject the second.
+\end{enumerate}
+
+\section{Summary and further reading}
+Persistent homology is a precise calculation on a specified filtration. Its scientific meaning is determined by vertices, distances, preprocessing, sampling, and the comparison model. Read \citet{desilva2011} for circular coordinates, \citet{app_bauer2021} for efficient Rips computation, and \citet{app_giusti2015} for a complementary neuron-correlation construction. The evidence audit in Chapter~\ref{ch:12} explains how to phrase conclusions at the level actually supported by these calculations.

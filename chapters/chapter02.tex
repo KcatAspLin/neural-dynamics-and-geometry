@@ -1,0 +1,185 @@
+\chapter{Foundations of dynamical systems}\label{ch:02}
+\begin{insight}{Learning objectives}
+Distinguish state, measurement, and input; solve and linearize basic evolution laws; apply stability criteria with their correct hypotheses; define attraction of sets; distinguish oscillation from a limit cycle; and understand why noise changes the meaning of persistence and stability.
+\end{insight}
+
+\section{From a picture of observations to a law of motion}
+A scatter plot says where observations occur. It does not say where the system goes next. The same circular cloud could be traversed clockwise, counterclockwise, irregularly under external input, or by independent sampling. A dynamical model adds an evolution rule.
+
+A \emph{state} contains enough information, under the proposed model and specified future inputs, to determine subsequent evolution or its probability law. Position alone is not a state for a freely moving mass: velocity is also needed. Similarly, a projection of neural activity is not automatically a complete neural state. Calling a variable a state is a modeling claim about sufficiency.
+
+A discrete-time autonomous system is $x_{t+1}=F(x_t)$, with $x_t$ in a state space $S$ and $F:S\to S$. ``Autonomous'' means that the rule has no explicit time dependence. With input, write $x_{t+1}=F(x_t,u_t)$; fixing $u_t=u_0$ defines a different autonomous system for each $u_0$. A continuous-time ordinary differential equation (ODE) is
+\begin{equation}\label{eq:ode}
+\dot x(t)=f(x(t)),\qquad x(0)=x_0,
+\end{equation}
+where the dot denotes derivative with respect to time. The vector field $f$ specifies instantaneous velocity. If $x$ is measured in firing-rate units and time in seconds, $f$ has firing-rate units per second.
+
+A non-autonomous ODE has explicit time dependence, $\dot x=f(x,t)$, or a specified time-varying input $\dot x=f(x,u(t))$. For example $\dot x=-x+\sin t$ is continually driven even after initial transients disappear. Its evolution depends on both starting time and elapsed time, so the solution maps generally have two time indices rather than a one-parameter flow. One can formally make it autonomous by adding a clock state $\dot s=1$, but the enlarged state space and its invariant sets must then be interpreted accordingly. Holding an input fixed for fixed-point analysis is a well-defined experimental condition, not a claim that the original task had constant input.
+
+
+\subsection{Why existence and uniqueness matter}
+\begin{theorem}[Local well-posedness, standard version]
+If $f$ is continuous and locally Lipschitz in $x$ on an open set $U\subset\R^p$, then through every $x_0\in U$ there is a unique local solution of \eqref{eq:ode}. A continuously differentiable vector field is locally Lipschitz. Solutions extend while they remain in compact subsets of the domain; global existence needs additional control preventing escape or blow-up.
+\end{theorem}
+\begin{proof}[Proof idea]
+Integrate the ODE to obtain $x(t)=x_0+\int_0^t f(x(s))\,ds$. On a sufficiently short interval the right-hand side is a contraction on continuous paths in a small ball: two paths become closer by at most a Lipschitz constant times the interval length. Iterating it converges to a unique fixed path. The same argument can be restarted along that path. Detailed hypotheses and continuation arguments are developed by \citet{teschl2012}.
+\end{proof}
+
+Continuity alone is insufficient. The equation $\dot x=2\sqrt{|x|}$ with $x(0)=0$ admits a solution that stays at zero until any chosen time $a\geq0$ and then follows $(t-a)^2$. In contrast, $\dot x=x^2$ is smooth but the solution $x(t)=x_0/(1-x_0t)$ blows up in finite positive time for $x_0>0$. Local well-posedness does not guarantee a global flow.
+
+Where solutions exist, define $\phi_t(x_0)=x(t)$. Uniqueness gives $\phi_0=\operatorname{id}$ and $\phi_{t+s}=\phi_t\circ\phi_s$ whenever both sides are defined. A global flow permits positive and negative times; a semiflow requires only nonnegative times. A \emph{trajectory} is the time-parameterized solution, while its \emph{orbit} is the set of points it visits. A phase portrait shows representative trajectories and the vector field. It should not be mistaken for an ensemble of independently sampled observations.
+
+\section{Equilibria and linear systems}
+An equilibrium $x_*$ satisfies $f(x_*)=0$, hence $x(t)=x_*$ is a constant solution. A discrete fixed point satisfies $F(x_*)=x_*$. The equations differ because an ODE specifies velocity and a map specifies the next state.
+
+\begin{example}[A one-dimensional decay]
+For $\tau\dot x=-x+b$, where $\tau>0$ is a time constant, $x_*=b$ and $x(t)=b+(x_0-b)e^{-t/\tau}$. A disturbance decreases by a factor $e$ in one time constant. Large $\tau$ produces slow relaxation, not a line of equilibria. If $\dot x=0$ instead, every point is an equilibrium, but none attracts neighboring points.
+\end{example}
+
+For a linear system $\dot x=Ax$, the solution is $e^{At}x_0$, where $e^{At}=\sum_{m\geq0}(At)^m/m!$. If $A$ has independent eigenvectors, decompose $x_0$ in this basis; each coefficient evolves as $e^{\lambda_jt}$. Complex conjugate eigenvalues produce rotation with exponential growth or decay. Jordan blocks add polynomial factors in $t$, which matter for transient behavior but cannot overcome strictly negative exponential rates asymptotically.
+
+\begin{example}[Three planar systems]
+The diagonal matrix $\diag(-1,-3)$ produces a stable node. The matrix $\left[\begin{smallmatrix}-a&-\omega\\\omega&-a\end{smallmatrix}\right]$, $a>0$, produces a stable spiral with eigenvalues $-a\pm i\omega$ and radius $r(t)=r(0)e^{-at}$. The diagonal matrix $\diag(1,-1)$ produces a saddle: the vertical axis approaches the origin, but generic initial states depart along the horizontal direction. A trajectory approaching an equilibrium is therefore insufficient to establish its stability.
+\end{example}
+
+An especially instructive stable matrix is
+\begin{equation}\label{eq:nonnormal}
+A=\begin{bmatrix}-1&K\\0&-2\end{bmatrix},\qquad
+x_0=\begin{bmatrix}0\\1\end{bmatrix}.
+\end{equation}
+Then $x_2(t)=e^{-2t}$ and $x_1(t)=K(e^{-t}-e^{-2t})$. For large $K$, the norm initially becomes large before eventually decaying. Eigenvalues diagnose asymptotic local stability, not absence of transient amplification. The matrix is nonnormal when $AA^T\ne A^TA$.
+
+\section{Stability: definitions before eigenvalue tests}
+Let $x_*$ be an equilibrium and suppose nearby solutions exist for all $t\geq0$.
+\begin{definition}[Lyapunov and asymptotic stability]\label{def:lyapunov-stability}
+The equilibrium is \emph{Lyapunov stable} if, for every $\epsilon>0$, there exists $\delta>0$ such that $\norm{x_0-x_*}<\delta$ implies $\norm{\phi_t(x_0)-x_*}<\epsilon$ for all $t\geq0$. It is \emph{locally attractive} if this distance tends to zero for every $x_0$ in some neighborhood. It is \emph{asymptotically stable} if both properties hold. It is \emph{exponentially stable} if, locally, $\norm{\phi_t(x_0)-x_*}\leq Me^{-ct}\norm{x_0-x_*}$ for constants $M,c>0$.
+\end{definition}
+The order of quantifiers matters. One chooses an allowed deviation $\epsilon$ first, then a sufficiently small initial disturbance $\delta$, and the resulting bound must hold at every future time. Local attraction alone does not express that trajectories stay near the equilibrium on their way back.
+
+For a continuously differentiable $f$, let $\xi=x-x_*$. Taylor expansion yields
+\begin{equation}\label{eq:linearization}
+\dot\xi=J\xi+r(\xi),\qquad J=Df(x_*),\qquad
+\frac{\norm{r(\xi)}}{\norm{\xi}}\longrightarrow0.
+\end{equation}
+The Jacobian entry $J_{ab}=\partial f_a/\partial x_b$ measures local influence of coordinate $b$ on velocity coordinate $a$.
+
+\begin{theorem}[Linearization stability tests]\label{thm:linear-stability}
+For a continuously differentiable ODE near an equilibrium, all eigenvalues of $J$ having strictly negative real part imply local exponential stability. An eigenvalue with strictly positive real part implies instability. If neither condition resolves the problem, nonlinear terms may determine the result. For a continuously differentiable discrete map, the analogous sufficient stability condition is that all eigenvalues of $DF(x_*)$ have modulus strictly below one; an eigenvalue with modulus strictly above one implies instability.
+\end{theorem}
+\begin{proof}[Why strict linear contraction survives small nonlinear terms]
+For a matrix $J$ whose eigenvalues have negative real parts, define
+$P=\int_0^\infty e^{J^Tt}e^{Jt}\,dt$. The exponential decay makes this integral finite and $P$ positive definite. Differentiating the integrand and integrating gives $J^TP+PJ=-I$. For the nonlinear system in \eqref{eq:linearization}, $V(\xi)=\xi^TP\xi$ therefore satisfies
+$\dot V=-\norm{\xi}^2+2\xi^TPr(\xi)$. Because $r(\xi)=o(\norm{\xi})$, the second term is smaller in magnitude than $\norm{\xi}^2/2$ in a sufficiently small neighborhood. Bounds of the form $c_1\norm{\xi}^2\leq V\leq c_2\norm{\xi}^2$ then imply exponential decay. This proves the sufficient continuous-time stability part; the instability and discrete-time statements require analogous local estimates.
+\end{proof}
+
+A hyperbolic equilibrium has no Jacobian eigenvalue with zero real part in continuous time, or on the unit circle in discrete time. The strict inequalities are essential. All three systems $\dot x=-x^3$, $\dot x=x^3$, and $\dot x=0$ have derivative zero at the origin; they are respectively asymptotically stable, unstable, and stable but not attractive.
+
+A forward Euler discretization $x_{m+1}=x_m+\Delta t f(x_m)$ changes continuous eigenvalues $\lambda$ to $1+\Delta t\lambda$ at an equilibrium. Even a stable ODE can become numerically unstable if the step is too large. For $\dot x=-ax$, $a>0$, Euler requires $0<a\Delta t<2$. Numerical instability must not be interpreted as a property of the original neural model.
+
+\section{Lyapunov functions and energy landscapes}
+A Lyapunov function is a scalar whose change along trajectories constrains motion. It need not be a physical energy or a quantity accessible from recordings.
+
+\begin{theorem}[A local Lyapunov criterion]\label{thm:lyapunov-function}
+Assume $f$ is locally Lipschitz, $f(0)=0$, and a continuously differentiable $V$ is defined near zero with $V(0)=0$, $V(x)>0$ for $x\ne0$. If
+\begin{equation}\label{eq:vdot}
+\dot V(x)=\nabla V(x)^Tf(x)\leq0,
+\end{equation}
+then zero is Lyapunov stable. If $\dot V(x)<0$ for every sufficiently small nonzero $x$, zero is locally asymptotically stable. A global conclusion requires global hypotheses, such as a radially unbounded $V$ and suitable global existence.
+\end{theorem}
+\begin{proof}[Proof sketch]
+Choose a closed ball inside the domain of $V$ and let $m>0$ be the minimum of $V$ on its boundary. For $0<c<m$, the component containing zero of $\{V\leq c\}$ inside the ball contains a smaller neighborhood of zero. Since $V$ cannot increase, a trajectory starting there cannot cross the ball boundary or the sublevel boundary outward. This proves stability. Under strict decrease, any compact annulus around zero has a negative upper bound on $\dot V$, so a trajectory cannot remain in that annulus indefinitely; compact trapping and this observation force convergence to zero.
+\end{proof}
+For $\dot x=-Ax$ with symmetric positive definite $A$, take $V=\norm{x}^2/2$; then $\dot V=-x^TAx<0$. A nonsymmetric stable system may require a different quadratic form. Nonpositive $\dot V$ alone is insufficient for attraction: planar rotation preserves $V=\norm{x}^2/2$.
+
+A Euclidean gradient flow has $\dot x=-\nabla E(x)$, so
+\begin{equation}\label{eq:gradient-energy}
+\frac{dE}{dt}=-\norm{\nabla E(x)}^2\leq0.
+\end{equation}
+A critical point with positive definite Hessian $D^2E$ is locally asymptotically stable because its dynamical Jacobian is $-D^2E$. Strict decrease excludes nonconstant periodic orbits. However a general vector field need not be a gradient. The rotational system $\dot x=-y$, $\dot y=x$ conserves $E=(x^2+y^2)/2$ and has an energy minimum at the origin without attraction. An energy minimum predicts dynamics only after specifying how that energy generates the dynamics.
+
+\begin{example}[Two basins from a scalar equation]\label{ex:double-well}
+Consider $\dot x=x-x^3=-E'(x)$ with $E(x)=x^4/4-x^2/2$. Equilibria are $-1,0,1$. The derivative $1-3x^2$ is $-2$ at $\pm1$ and $1$ at zero. The stable equilibria have basins $(-\infty,0)$ and $(0,\infty)$; zero lies on their boundary. A perturbation within a basin returns, whereas one crossing zero can converge to the other equilibrium. Local stability and basin size answer different questions.
+\end{example}
+
+\section{Invariant sets, attractors, and periodic motion}
+For a global flow, a set $A$ is invariant if $\phi_t(A)=A$ for all $t$; forward invariance only requires $\phi_t(A)\subseteq A$ for $t\geq0$. Define distance to a set by $\operatorname{dist}(x,A)=\inf_{a\in A}\norm{x-a}$.
+
+\begin{definition}[Attractor convention used in this book]\label{def:attractor}
+An attractor is a nonempty compact invariant set $A$ that is Lyapunov stable as a set and attracts a neighborhood: for every initial state in some neighborhood of $A$, $\operatorname{dist}(\phi_t(x),A)\to0$. Set stability replaces $\norm{x-x_*}$ in Definition~\ref{def:lyapunov-stability} with distance to $A$. Its basin is the set of initial conditions whose distance to $A$ tends to zero. We do not require the attractor to be indecomposable or minimal.
+\end{definition}
+This convention deliberately states the stability requirement. Other literature uses attracting sets without it, global attractors with specified classes of attracted sets, or Milnor attractors defined using positive-measure basins and an appropriate minimality condition. These notions need not coincide \citep{milnor1985}. A claim about an ``attractor'' must identify which properties are intended. Compactness also means that an entire unbounded line of equilibria is not an attractor under our convention, although it is often called a line attractor in modeling; Chapter~\ref{ch:07} explains that usage.
+
+A periodic solution satisfies $x(t+T)=x(t)$ for some $T>0$ and is not constant. Its orbit is a periodic orbit. A \emph{limit cycle} is an isolated periodic orbit, not any closed curve in a plot. It can be attracting or repelling.
+
+\begin{example}[A stable cycle with no stable point on it]\label{ex:hopf-normal}
+In Cartesian coordinates, take
+\begin{align}
+\dot x&=\mu x-\omega y-(x^2+y^2)x,\\
+\dot y&=\omega x+\mu y-(x^2+y^2)y,
+\end{align}
+with $\omega\ne0$. Polar coordinates give $\dot r=\mu r-r^3$, $\dot\theta=\omega$. For $\mu>0$, $r=\sqrt\mu$ is an attracting cycle; the radial derivative there is $-2\mu$. An initial phase shift does not disappear, so trajectories approach the orbit as a set rather than a specified moving point. For $\mu<0$, the origin attracts. At $\mu=0$, the origin remains attractive with algebraic rather than exponential radial decay.
+\end{example}
+In a general periodic orbit, transverse stability is studied with a return map on a small cross-section or with Floquet multipliers. Continuous-time motion supplies a neutral phase direction with multiplier one. Therefore demanding negative instantaneous eigenvalues in every direction is not a valid limit-cycle test.
+
+\section{Bifurcations: qualitative change as a parameter varies}
+A bifurcation is a change in qualitative dynamical structure as a parameter crosses a critical value. A response curve that is merely steep is not enough.
+
+For the saddle-node normal form
+\begin{equation}
+\dot x=\mu-x^2,
+\end{equation}
+there are no equilibria for $\mu<0$, one nonhyperbolic equilibrium for $\mu=0$, and two for $\mu>0$. The positive root $\sqrt\mu$ is stable and the negative root is unstable because $f'(x)=-2x$. The standard local theorem requires a scalar equilibrium with $f=0$, $f_x=0$, $f_{xx}\ne0$, and $f_\mu\ne0$ at the bifurcation, with smoothness sufficient for the expansion. These conditions prevent higher-order degeneracies. Near the vanished equilibria trajectories may remain slow, creating a ``ghost'' without a remaining fixed point.
+
+Example~\ref{ex:hopf-normal} realizes a supercritical Hopf bifurcation. In a general smooth family, the local Hopf theorem requires a simple conjugate eigenvalue pair crossing the imaginary axis with nonzero speed, no other eigenvalues on that axis, and a nonzero first Lyapunov coefficient for the nondegenerate classification. The sign of this coefficient determines the direction and stability of the small cycle on the two-dimensional center manifold, under the chosen parameter orientation. For the supercritical stable cycle to be orbitally attracting in the full state space, all remaining eigenvalues must have strictly negative real parts; unstable transverse directions prevent full-space attraction. Seeing complex eigenvalues is insufficient: their real parts must cross zero with the required nondegeneracy.
+
+\section{Stochastic dynamics: distributions replace exact settling}
+Random variability can enter as unobserved input, measurement noise, or intrinsic process noise. These have different inferential consequences. An introductory It\^o stochastic differential equation is
+\begin{equation}\label{eq:sde}
+ dX_t=f(X_t)\,dt+G(X_t)\,dW_t,
+\end{equation}
+where $W_t$ is a vector of independent Brownian motions. Brownian increments over duration $\Delta t$ have mean zero and variance $\Delta t$, and disjoint increments are independent. Paths are continuous but are almost surely not differentiable, so $dW_t/dt$ is only a formal notation. A simple numerical approximation is Euler--Maruyama:
+\begin{equation}
+X_{m+1}=X_m+f(X_m)\Delta t+G(X_m)\sqrt{\Delta t}\,\xi_m,
+\quad \xi_m\sim\mathcal N(0,I).
+\end{equation}
+If $X$ has physical units, entries of $G$ have units of $X/\sqrt{\rm time}$. Multiplicative noise requires specifying It\^o or Stratonovich convention; their drift terms differ. Rigorous stochastic integration is an extension beyond the prerequisites, introduced further in Appendix~\ref{app:d} and treated in \citet{oksendal2003}.
+
+\begin{example}[A stable deterministic point becomes a stationary cloud]
+For $dX_t=-aX_t\,dt+\sigma\,dW_t$, $a>0$, deterministic initial condition $X_0=x_0$ gives
+\begin{equation}
+\E[X_t]=x_0e^{-at},\qquad
+\Var(X_t)=\frac{\sigma^2}{2a}(1-e^{-2at}).
+\end{equation}
+An integrating factor yields $X_t=x_0e^{-at}+\sigma\int_0^t e^{-a(t-s)}dW_s$; independent increments give the variance by integrating the squared kernel. The stationary distribution is $\mathcal N(0,\sigma^2/(2a))$. Individual trajectories do not settle at zero. Concentration of a stationary distribution is not the same as deterministic asymptotic convergence.
+\end{example}
+
+Adding nonzero noise to the double-well model permits occasional basin crossings. Long residence followed by switching is \emph{metastability} when the residence times are long compared with within-region relaxation. It can arise from noisy motion between deterministic basins, slow deterministic transients, or switching inputs. A multimodal histogram does not distinguish these mechanisms. Stochastic stability may mean stability in probability, moment bounds, or robustness of an invariant distribution; the intended definition must be stated.
+
+\section{A recurrent network as a dynamical system}
+A continuous rate network has
+\begin{equation}\label{eq:rate-network-foundation}
+\tau\dot h=-h+\phi(Wh+Bu+b),
+\end{equation}
+where $h\in\R^p$ is state, $W$ recurrent weights, $B$ input weights, $b$ bias, and $\phi$ an elementwise nonlinearity. For a fixed input $u_0$, solve $h_* =\phi(Wh_*+Bu_0+b)$. The Jacobian is
+\begin{equation}
+J=\tau^{-1}\{-I+\diag[\phi'(Wh_*+Bu_0+b)]W\}.
+\end{equation}
+Its eigenvalues are rates with inverse-time units. For the discrete network $h_{t+1}=\phi(Wh_t+Bu_t+b)$, the Jacobian lacks both $-I$ and the factor $\tau^{-1}$, and stability uses the unit disk. Mixing these two formulas gives an incorrect stability conclusion.
+
+\begin{insight}{From a trajectory to evidence for attraction}
+A defensible attraction claim needs a specified state and input condition, a candidate invariant set, behavior of nearby perturbed initial states, and evidence of return over a meaningful time range. A fitted model can supply these properties within the model. Biological recordings require additional checks for missing variables, shared external drive, and finite observation duration. Slow speed, repeated occupancy, and converging trial averages are useful observations but are not individually sufficient.
+\end{insight}
+
+\section{Exercises}
+\begin{enumerate}
+\item \textbf{Introductory.} Solve $\dot x=-2(x-3)$ and identify equilibrium, time constant, and basin.
+\item \textbf{Introductory.} Classify $\dot x=-x$, $\dot x=x$, and $\dot x=-x^3$ at zero. Which convergence is exponential?
+\item \textbf{Intermediate.} Derive the maximum of the transient $K(e^{-t}-e^{-2t})$ in \eqref{eq:nonnormal}. Explain why increasing $K$ changes amplification without changing eigenvalues.
+\item \textbf{Intermediate.} Show that the union of the two stable equilibria in Example~\ref{ex:double-well} satisfies the attractor convention. Explain why the convention does not identify a unique ``the attractor.''
+\item \textbf{Intermediate.} Find the stable Euler step-size range for the spiral eigenvalues $-a\pm i\omega$.
+\item \textbf{Advanced.} Construct a dataset with circular geometry from a driven system that has no autonomous attracting cycle. State an intervention that distinguishes it from Example~\ref{ex:hopf-normal}.
+\item \textbf{Advanced.} Derive the stationary variance of the scalar Ornstein--Uhlenbeck process and explain why a narrower stationary distribution can result from either weaker noise or stronger restoring drift.
+\end{enumerate}
+
+\section{Summary and further reading}
+Dynamics concerns evolution laws, not merely occupied shapes. Local Jacobians and Lyapunov functions provide complementary sufficient stability tests. Attraction is a property of nearby trajectories relative to an invariant set, and a basin is a global object. Noise requires explicit probability-based statements. \citet{teschl2012} supplies a rigorous ODE development; \citet{milnor1985} explains why attractor definitions must be chosen carefully; \citet{oksendal2003} develops the stochastic theory beyond the introductory constructions used here.
